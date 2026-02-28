@@ -32,7 +32,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Role role;
+    private Role role = Role.USER;
 
     @Column(name = "display_name", length = 150)
     private String displayName;
