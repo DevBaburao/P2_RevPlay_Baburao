@@ -1,10 +1,12 @@
 package com.rev.app.service;
 
 import com.rev.app.dto.SongDTO;
+import com.rev.app.entity.Album;
 import com.rev.app.entity.ArtistProfile;
 import com.rev.app.entity.Genre;
 import com.rev.app.entity.Song;
 import com.rev.app.mapper.SongMapper;
+import com.rev.app.repository.AlbumRepository;
 import com.rev.app.repository.ArtistProfileRepository;
 import com.rev.app.repository.GenreRepository;
 import com.rev.app.repository.SongRepository;
@@ -19,15 +21,18 @@ public class SongServiceImpl implements SongService {
     private final SongRepository songRepository;
     private final ArtistProfileRepository artistProfileRepository;
     private final GenreRepository genreRepository;
+    private final AlbumRepository albumRepository;
     private final SongMapper songMapper;
 
     public SongServiceImpl(SongRepository songRepository,
             ArtistProfileRepository artistProfileRepository,
             GenreRepository genreRepository,
+            AlbumRepository albumRepository,
             SongMapper songMapper) {
         this.songRepository = songRepository;
         this.artistProfileRepository = artistProfileRepository;
         this.genreRepository = genreRepository;
+        this.albumRepository = albumRepository;
         this.songMapper = songMapper;
     }
 
@@ -40,6 +45,15 @@ public class SongServiceImpl implements SongService {
                 .orElseThrow(() -> new RuntimeException("Genre not found with ID: " + dto.getGenreId()));
 
         Song entity = songMapper.toEntity(dto, artist, genre);
+
+        if (dto.getAlbumId() != null) {
+            Album album = albumRepository.findById(dto.getAlbumId())
+                    .orElseThrow(() -> new RuntimeException("Album not found"));
+            entity.setAlbum(album);
+        } else {
+            entity.setAlbum(null);
+        }
+
         Song savedEntity = songRepository.save(entity);
         return songMapper.toDto(savedEntity);
     }
@@ -77,7 +91,15 @@ public class SongServiceImpl implements SongService {
                 .orElseThrow(() -> new RuntimeException("Genre not found with ID: " + dto.getGenreId()));
 
         existingEntity.setArtist(artist);
-        existingEntity.setAlbumId(dto.getAlbumId());
+
+        if (dto.getAlbumId() != null) {
+            Album album = albumRepository.findById(dto.getAlbumId())
+                    .orElseThrow(() -> new RuntimeException("Album not found"));
+            existingEntity.setAlbum(album);
+        } else {
+            existingEntity.setAlbum(null);
+        }
+
         existingEntity.setGenre(genre);
         existingEntity.setTitle(dto.getTitle());
         existingEntity.setDuration(dto.getDuration());

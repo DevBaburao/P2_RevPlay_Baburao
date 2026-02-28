@@ -19,7 +19,11 @@ public class SongMapper {
         if (entity.getArtist() != null) {
             dto.setArtistId(entity.getArtist().getId());
         }
-        dto.setAlbumId(entity.getAlbumId());
+        if (entity.getAlbum() != null) {
+            dto.setAlbumId(entity.getAlbum().getId());
+        } else {
+            dto.setAlbumId(null);
+        }
         if (entity.getGenre() != null) {
             dto.setGenreId(entity.getGenre().getId());
         }
