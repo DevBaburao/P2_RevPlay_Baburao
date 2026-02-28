@@ -3,6 +3,7 @@ package com.rev.app.service;
 import com.rev.app.dto.AlbumDTO;
 import com.rev.app.entity.Album;
 import com.rev.app.entity.ArtistProfile;
+import com.rev.app.exception.ResourceNotFoundException;
 import com.rev.app.repository.AlbumRepository;
 import com.rev.app.repository.ArtistProfileRepository;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public AlbumDTO createAlbum(AlbumDTO dto) {
         ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
 
         Album album = new Album();
         album.setArtist(artist);
@@ -50,17 +51,17 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public AlbumDTO getAlbumById(Long id) {
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Album not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Album not found"));
         return mapToDTO(album);
     }
 
     @Override
     public AlbumDTO updateAlbum(Long id, AlbumDTO dto) {
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Album not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Album not found"));
 
         ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
 
         album.setArtist(artist);
         album.setName(dto.getName());
@@ -77,7 +78,7 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public void deleteAlbum(Long id) {
         if (!albumRepository.existsById(id)) {
-            throw new RuntimeException("Album not found");
+            throw new ResourceNotFoundException("Album not found");
         }
         albumRepository.deleteById(id);
     }

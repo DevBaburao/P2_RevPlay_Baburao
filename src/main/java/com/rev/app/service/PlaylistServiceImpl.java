@@ -3,6 +3,7 @@ package com.rev.app.service;
 import com.rev.app.dto.PlaylistDTO;
 import com.rev.app.entity.Playlist;
 import com.rev.app.entity.Song;
+import com.rev.app.exception.ResourceNotFoundException;
 import com.rev.app.repository.PlaylistRepository;
 import com.rev.app.repository.SongRepository;
 import org.springframework.stereotype.Service;
@@ -33,10 +34,10 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public PlaylistDTO addSongToPlaylist(Long playlistId, Long songId) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found"));
 
         Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Song not found"));
 
         playlist.getSongs().add(song);
         Playlist savedPlaylist = playlistRepository.save(playlist);
@@ -47,7 +48,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public PlaylistDTO removeSongFromPlaylist(Long playlistId, Long songId) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found"));
 
         playlist.getSongs().removeIf(song -> song.getId().equals(songId));
         Playlist savedPlaylist = playlistRepository.save(playlist);
@@ -58,7 +59,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public PlaylistDTO getPlaylistById(Long id) {
         Playlist playlist = playlistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found"));
 
         return mapToDTO(playlist);
     }

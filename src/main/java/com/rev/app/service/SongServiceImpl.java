@@ -5,6 +5,7 @@ import com.rev.app.entity.Album;
 import com.rev.app.entity.ArtistProfile;
 import com.rev.app.entity.Genre;
 import com.rev.app.entity.Song;
+import com.rev.app.exception.ResourceNotFoundException;
 import com.rev.app.mapper.SongMapper;
 import com.rev.app.repository.AlbumRepository;
 import com.rev.app.repository.ArtistProfileRepository;
@@ -41,16 +42,16 @@ public class SongServiceImpl implements SongService {
     @Override
     public SongDTO createSong(SongDTO dto) {
         ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with ID: " + dto.getArtistId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found with ID: " + dto.getArtistId()));
 
         Genre genre = genreRepository.findById(dto.getGenreId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with ID: " + dto.getGenreId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Genre not found with ID: " + dto.getGenreId()));
 
         Song entity = songMapper.toEntity(dto, artist, genre);
 
         if (dto.getAlbumId() != null) {
             Album album = albumRepository.findById(dto.getAlbumId())
-                    .orElseThrow(() -> new RuntimeException("Album not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Album not found"));
             entity.setAlbum(album);
         } else {
             entity.setAlbum(null);
@@ -63,7 +64,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public SongDTO getSongById(Long id) {
         Song entity = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Song not found with ID: " + id));
         if (entity.getIsDeleted() != null && entity.getIsDeleted() == 1) {
             throw new RuntimeException("Song is deleted");
         }
@@ -79,23 +80,23 @@ public class SongServiceImpl implements SongService {
     @Override
     public SongDTO updateSong(Long id, SongDTO dto) {
         Song existingEntity = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Song not found with ID: " + id));
 
         if (existingEntity.getIsDeleted() != null && existingEntity.getIsDeleted() == 1) {
             throw new RuntimeException("Cannot update a deleted song");
         }
 
         ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with ID: " + dto.getArtistId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found with ID: " + dto.getArtistId()));
 
         Genre genre = genreRepository.findById(dto.getGenreId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with ID: " + dto.getGenreId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Genre not found with ID: " + dto.getGenreId()));
 
         existingEntity.setArtist(artist);
 
         if (dto.getAlbumId() != null) {
             Album album = albumRepository.findById(dto.getAlbumId())
-                    .orElseThrow(() -> new RuntimeException("Album not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Album not found"));
             existingEntity.setAlbum(album);
         } else {
             existingEntity.setAlbum(null);
@@ -117,7 +118,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public void deleteSong(Long id) {
         Song song = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Song not found"));
 
         song.setIsDeleted(1);
         songRepository.save(song);
