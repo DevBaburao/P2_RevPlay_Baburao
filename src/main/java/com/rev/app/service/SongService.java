@@ -4,6 +4,7 @@ import com.rev.app.dto.SongDTO;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import com.rev.app.dto.SongPlayCountDTO;
 import org.springframework.data.domain.Pageable;
 
 public interface SongService {
@@ -18,4 +19,8 @@ public interface SongService {
     void deleteSong(Long id);
 
     List<SongDTO> searchSongs(String title);
+
+    List<SongPlayCountDTO> getTopSongs(int limit);
+
+    List<SongPlayCountDTO> getTrendingSongs();
 }

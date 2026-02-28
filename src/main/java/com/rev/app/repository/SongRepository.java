@@ -1,6 +1,7 @@
 package com.rev.app.repository;
 
 import com.rev.app.entity.Song;
+import com.rev.app.entity.ArtistProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     Page<Song> findByIsDeleted(Integer isDeleted, Pageable pageable);
 
     List<Song> findByTitleContainingIgnoreCaseAndIsDeleted(String title, Integer isDeleted);
+
+    Long countByArtistAndIsDeleted(ArtistProfile artist, Integer isDeleted);
 }

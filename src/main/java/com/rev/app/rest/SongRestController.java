@@ -11,6 +11,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
+import com.rev.app.dto.SongPlayCountDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -71,5 +72,19 @@ public class SongRestController {
     public ResponseEntity<List<SongDTO>> searchSongs(@RequestParam String title) {
         List<SongDTO> songs = songService.searchSongs(title);
         return ResponseEntity.ok(songs);
+    }
+
+    @GetMapping("/top")
+    @Operation(summary = "Get top played songs")
+    public ResponseEntity<List<SongPlayCountDTO>> getTopSongs(@RequestParam(defaultValue = "10") int limit) {
+        List<SongPlayCountDTO> topSongs = songService.getTopSongs(limit);
+        return ResponseEntity.ok(topSongs);
+    }
+
+    @GetMapping("/trending")
+    @Operation(summary = "Get trending songs (highest plays in last 7 days)")
+    public ResponseEntity<List<SongPlayCountDTO>> getTrendingSongs() {
+        List<SongPlayCountDTO> trendingSongs = songService.getTrendingSongs();
+        return ResponseEntity.ok(trendingSongs);
     }
 }
