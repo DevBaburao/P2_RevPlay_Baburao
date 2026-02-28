@@ -25,8 +25,9 @@ public class Song {
     @JoinColumn(name = "artist_id", nullable = false)
     private ArtistProfile artist;
 
-    @Column(name = "album_id")
-    private Long albumId;
+    @ManyToOne
+    @JoinColumn(name = "album_id", nullable = true)
+    private Album album;
 
     @ManyToOne
     @JoinColumn(name = "genre_id", nullable = false)
@@ -76,11 +77,24 @@ public class Song {
     }
 
     public Long getAlbumId() {
-        return albumId;
+        return album != null ? album.getId() : null;
     }
 
     public void setAlbumId(Long albumId) {
-        this.albumId = albumId;
+        if (albumId != null) {
+            this.album = new Album();
+            this.album.setId(albumId);
+        } else {
+            this.album = null;
+        }
+    }
+
+    public Album getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(Album album) {
+        this.album = album;
     }
 
     public Genre getGenre() {
