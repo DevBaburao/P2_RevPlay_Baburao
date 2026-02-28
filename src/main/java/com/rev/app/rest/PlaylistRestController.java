@@ -5,6 +5,10 @@ import com.rev.app.service.PlaylistService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("/api/playlists")
@@ -39,5 +43,21 @@ public class PlaylistRestController {
     public ResponseEntity<PlaylistDTO> getPlaylistById(@PathVariable Long id) {
         PlaylistDTO playlist = playlistService.getPlaylistById(id);
         return ResponseEntity.ok(playlist);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PlaylistDTO>> getAllPlaylists(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Page<PlaylistDTO> playlists = playlistService.getAllPlaylists(pageable);
+        return ResponseEntity.ok(playlists);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
+        playlistService.deletePlaylist(id);
+        return ResponseEntity.noContent().build();
     }
 }

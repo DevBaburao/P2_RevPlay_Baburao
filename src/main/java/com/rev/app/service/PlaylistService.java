@@ -1,6 +1,8 @@
 package com.rev.app.service;
 
 import com.rev.app.dto.PlaylistDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PlaylistService {
     PlaylistDTO createPlaylist(PlaylistDTO dto);
@@ -10,4 +12,8 @@ public interface PlaylistService {
     PlaylistDTO removeSongFromPlaylist(Long playlistId, Long songId);
 
     PlaylistDTO getPlaylistById(Long id);
+
+    Page<PlaylistDTO> getAllPlaylists(Pageable pageable);
+
+    void deletePlaylist(Long id);
 }
