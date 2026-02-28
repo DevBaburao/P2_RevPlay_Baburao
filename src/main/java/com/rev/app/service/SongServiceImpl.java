@@ -115,11 +115,10 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public void deleteSong(Long id) {
-        Song existingEntity = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found with ID: " + id));
+        Song song = songRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Song not found"));
 
-        // Soft delete
-        existingEntity.setIsDeleted(1);
-        songRepository.save(existingEntity);
+        song.setIsDeleted(1);
+        songRepository.save(song);
     }
 }
