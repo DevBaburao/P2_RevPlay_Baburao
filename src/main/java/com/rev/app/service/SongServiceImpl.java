@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class SongServiceImpl implements SongService {
@@ -69,10 +71,9 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public List<SongDTO> getAllSongs() {
-        return songRepository.findByIsDeleted(0).stream()
-                .map(songMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<SongDTO> getAllSongs(Pageable pageable) {
+        return songRepository.findByIsDeleted(0, pageable)
+                .map(songMapper::toDto);
     }
 
     @Override
