@@ -1,12 +1,19 @@
 package com.rev.app.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public class PlaylistDTO {
 
     private Long id;
+
+    @NotBlank(message = "Name cannot be blank")
     private String name;
+
+    @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
+
     private List<Long> songIds;
 
     public Long getId() {

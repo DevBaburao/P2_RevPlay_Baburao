@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,6 +84,13 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         playlist.setIsDeleted(1);
         playlistRepository.save(playlist);
+    }
+
+    @Override
+    public List<PlaylistDTO> searchPlaylists(String name) {
+        return playlistRepository.findByNameContainingIgnoreCaseAndIsDeleted(name, 0).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     private PlaylistDTO mapToDTO(Playlist playlist) {

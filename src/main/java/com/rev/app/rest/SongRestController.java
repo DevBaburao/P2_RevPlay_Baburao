@@ -4,9 +4,12 @@ import com.rev.app.dto.SongDTO;
 import com.rev.app.service.SongService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("/api/songs")
+@Tag(name = "Song Management", description = "Endpoints for managing songs")
 public class SongRestController {
 
     private final SongService songService;
@@ -23,12 +27,14 @@ public class SongRestController {
     }
 
     @PostMapping
-    public ResponseEntity<SongDTO> createSong(@RequestBody SongDTO dto) {
+    @Operation(summary = "Create a new song")
+    public ResponseEntity<SongDTO> createSong(@Valid @RequestBody SongDTO dto) {
         SongDTO created = songService.createSong(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping
+    @Operation(summary = "Get all songs with pagination")
     public ResponseEntity<Page<SongDTO>> getAllSongs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -40,20 +46,30 @@ public class SongRestController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get a song by ID")
     public ResponseEntity<SongDTO> getSongById(@PathVariable Long id) {
         SongDTO song = songService.getSongById(id);
         return ResponseEntity.ok(song);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SongDTO> updateSong(@PathVariable Long id, @RequestBody SongDTO dto) {
+    @Operation(summary = "Update an existing song")
+    public ResponseEntity<SongDTO> updateSong(@PathVariable Long id, @Valid @RequestBody SongDTO dto) {
         SongDTO updated = songService.updateSong(id, dto);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a song (soft delete)")
     public ResponseEntity<Void> deleteSong(@PathVariable Long id) {
         songService.deleteSong(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search for a song by title")
+    public ResponseEntity<List<SongDTO>> searchSongs(@RequestParam String title) {
+        List<SongDTO> songs = songService.searchSongs(title);
+        return ResponseEntity.ok(songs);
     }
 }

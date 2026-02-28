@@ -4,6 +4,7 @@ import com.rev.app.dto.ArtistProfileDTO;
 import com.rev.app.service.ArtistProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class ArtistProfileRestController {
     }
 
     @PostMapping
-    public ResponseEntity<ArtistProfileDTO> createArtistProfile(@RequestBody ArtistProfileDTO dto) {
+    public ResponseEntity<ArtistProfileDTO> createArtistProfile(@Valid @RequestBody ArtistProfileDTO dto) {
         ArtistProfileDTO created = artistProfileService.createArtistProfile(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -42,3 +43,4 @@ public class ArtistProfileRestController {
         return ResponseEntity.ok(profile);
     }
 }
+

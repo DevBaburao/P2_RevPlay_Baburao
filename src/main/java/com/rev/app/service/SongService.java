@@ -16,4 +16,6 @@ public interface SongService {
     SongDTO updateSong(Long id, SongDTO dto);
 
     void deleteSong(Long id);
+
+    List<SongDTO> searchSongs(String title);
 }

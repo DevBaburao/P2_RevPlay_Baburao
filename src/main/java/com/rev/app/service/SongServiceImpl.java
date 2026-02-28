@@ -123,4 +123,11 @@ public class SongServiceImpl implements SongService {
         song.setIsDeleted(1);
         songRepository.save(song);
     }
+
+    @Override
+    public List<SongDTO> searchSongs(String title) {
+        return songRepository.findByTitleContainingIgnoreCaseAndIsDeleted(title, 0).stream()
+                .map(songMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

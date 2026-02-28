@@ -1,5 +1,7 @@
 package com.rev.app.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.sql.Date;
 import java.sql.Timestamp;
 
@@ -9,7 +11,11 @@ public class SongDTO {
     private Long artistId;
     private Long albumId;
     private Long genreId;
+
+    @NotBlank(message = "Title cannot be blank")
     private String title;
+
+    @NotNull(message = "Duration cannot be null")
     private Long duration;
     private String audioUrl;
     private Long fileSize;

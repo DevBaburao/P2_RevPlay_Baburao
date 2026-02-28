@@ -13,4 +13,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByIsDeleted(Integer isDeleted);
 
     Page<Song> findByIsDeleted(Integer isDeleted, Pageable pageable);
+
+    List<Song> findByTitleContainingIgnoreCaseAndIsDeleted(String title, Integer isDeleted);
 }
