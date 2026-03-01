@@ -47,8 +47,14 @@
                             th:text="${song.genre != null ? song.genre.name : 'Unknown Genre'}">Genre</p>
 
                         <div class="mt-auto">
-                            <form th:action="@{/playlist/add}" method="post">
+                            <form method="post"
+                                onsubmit="this.action='/playlists/' + this.playlistId.value + '/songs/' + this.songId.value; return true;">
                                 <input type="hidden" name="songId" th:value="${song.id}" />
+                                <select name="playlistId" class="form-select form-select-sm mb-2" required>
+                                    <option value="" disabled selected>Select Playlist</option>
+                                    <option th:each="playlist : ${playlists}" th:value="${playlist.id}"
+                                        th:text="${playlist.name}"></option>
+                                </select>
                                 <button type="submit" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
                                     Add to Playlist
                                 </button>
