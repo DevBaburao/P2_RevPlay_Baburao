@@ -17,4 +17,14 @@ public class PlaylistController {
         playlistService.addSongToPlaylist(playlistId, songId);
         return "redirect:/dashboard";
     }
+
+    @Autowired
+    private com.rev.app.repository.PlaylistRepository playlistRepository;
+
+    @org.springframework.web.bind.annotation.GetMapping("/my-playlists")
+    public String myPlaylists(org.springframework.ui.Model model) {
+        // Fetching all playlists directly to access their songs
+        model.addAttribute("playlists", playlistRepository.findAll());
+        return "my-playlists";
+    }
 }
