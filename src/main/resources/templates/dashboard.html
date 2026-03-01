@@ -90,6 +90,34 @@
                 <h5 class="text-muted">No songs available at the moment.</h5>
             </div>
         </div>
+
+        <!-- Pagination Section -->
+        <div class="row mt-4" th:if="${totalPages > 1}">
+            <div class="col-12 d-flex justify-content-center">
+                <nav aria-label="Song pagination">
+                    <ul class="pagination pagination-sm">
+                        <!-- Previous Button -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/dashboard(page=${currentPage - 1}, keyword=${keyword})}"
+                                tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/dashboard(page=${i}, keyword=${keyword})}"
+                                th:text="${i + 1}">1</a>
+                        </li>
+
+                        <!-- Next Button -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/dashboard(page=${currentPage + 1}, keyword=${keyword})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
 </body>
 

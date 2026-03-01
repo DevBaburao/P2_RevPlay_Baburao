@@ -24,15 +24,26 @@ public class FrontendController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(@org.springframework.web.bind.annotation.RequestParam(required = false) String keyword,
+    public String dashboard(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String keyword,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "5") int size,
             org.springframework.ui.Model model) {
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<com.rev.app.entity.Song> songPage;
+
         if (keyword != null && !keyword.trim().isEmpty()) {
-            model.addAttribute("songs", songRepository
-                    .findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(keyword.trim(), keyword.trim()));
+            songPage = songRepository.findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(keyword.trim(),
+                    keyword.trim(), pageable);
             model.addAttribute("keyword", keyword.trim());
         } else {
-            model.addAttribute("songs", songRepository.findAll());
+            songPage = songRepository.findAll(pageable);
         }
+
+        model.addAttribute("songs", songPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", songPage.getTotalPages());
         model.addAttribute("playlists", playlistRepository.findAll());
         return "dashboard";
     }

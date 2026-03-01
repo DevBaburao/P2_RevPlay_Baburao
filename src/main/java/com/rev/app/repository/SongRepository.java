@@ -23,4 +23,10 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(
             @org.springframework.data.repository.query.Param("name") String name,
             @org.springframework.data.repository.query.Param("artist") String artist);
+
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM Song s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(s.artist.artistName) LIKE LOWER(CONCAT('%', :artist, '%'))")
+    org.springframework.data.domain.Page<Song> findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(
+            @org.springframework.data.repository.query.Param("name") String name,
+            @org.springframework.data.repository.query.Param("artist") String artist,
+            org.springframework.data.domain.Pageable pageable);
 }
