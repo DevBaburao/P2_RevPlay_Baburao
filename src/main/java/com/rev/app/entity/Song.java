@@ -54,6 +54,9 @@ public class Song {
     @Column(length = 20)
     private String status;
 
+    @Column(name = "play_count", columnDefinition = "NUMBER DEFAULT 0")
+    private Long playCount = 0L;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
@@ -191,6 +194,14 @@ public class Song {
 
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public Long getPlayCount() {
+        return playCount != null ? playCount : 0L;
+    }
+
+    public void setPlayCount(Long playCount) {
+        this.playCount = playCount;
     }
 
     public java.util.Set<User> getLikedByUsers() {

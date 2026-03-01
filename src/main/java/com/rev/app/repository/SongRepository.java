@@ -31,4 +31,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
                         org.springframework.data.domain.Pageable pageable);
 
         List<Song> findByArtist_IdAndIsDeleted(Long artistId, Integer isDeleted);
+
+        List<Song> findTop5ByIsDeletedOrderByPlayCountDesc(Integer isDeleted);
 }

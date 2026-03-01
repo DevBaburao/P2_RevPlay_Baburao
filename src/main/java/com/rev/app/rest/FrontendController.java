@@ -57,7 +57,21 @@ public class FrontendController {
         com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
         model.addAttribute("user", user);
 
+        java.util.List<com.rev.app.entity.Song> topSongs = songRepository.findTop5ByIsDeletedOrderByPlayCountDesc(0);
+        model.addAttribute("topSongs", topSongs);
+
         return "dashboard";
+    }
+
+    @GetMapping("/songs/play/{id}")
+    public String playSong(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
+        if (song != null) {
+            song.setPlayCount(song.getPlayCount() + 1);
+            songRepository.save(song);
+            return "redirect:" + song.getAudioUrl();
+        }
+        return "redirect:/dashboard";
     }
 
     @Autowired

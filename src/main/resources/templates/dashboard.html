@@ -15,6 +15,9 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/my-playlists}">My Playlists</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/liked-songs}">Liked Songs</a>
+                    </li>
                     <li class="nav-item" sec:authorize="hasRole('ARTIST')">
                         <a class="nav-link" th:href="@{/my-songs}">My Songs</a>
                     </li>
@@ -61,6 +64,81 @@
             </div>
         </div>
 
+        <!-- Top Played Songs -->
+        <div th:if="${topSongs != null and !topSongs.isEmpty()}">
+            <h3 class="fw-bold mb-3 text-primary">🔥 Top Played Songs</h3>
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4 mb-4">
+                <div class="col" th:each="song : ${topSongs}">
+                    <div class="card h-100 shadow-sm border-0 rounded-3"
+                        style="background-color: #f8faff; border-left: 4px solid #0d6efd !important;">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h5 class="card-title text-truncate fw-bold mb-0 text-primary" th:text="${song.title}"
+                                    style="max-width: 80%;">Song Title</h5>
+                                <div>
+                                    <a th:if="${user != null and !user.likedSongs.contains(song)}"
+                                        th:href="@{/songs/like/{id}(id=${song.id})}"
+                                        class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center"
+                                        style="width: 28px; height: 28px;" title="Like">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                            <path
+                                                d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                        </svg>
+                                    </a>
+                                    <a th:if="${user != null and user.likedSongs.contains(song)}"
+                                        th:href="@{/songs/unlike/{id}(id=${song.id})}"
+                                        class="btn btn-sm btn-danger rounded-circle p-1 d-flex align-items-center justify-content-center"
+                                        style="width: 28px; height: 28px;" title="Unlike">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <h6 class="card-subtitle mb-2 text-muted text-truncate"
+                                th:text="${song.artist != null ? (song.artist.displayName != null ? song.artist.displayName : song.artist.username) : 'Unknown Artist'}">
+                                Artist Name
+                            </h6>
+                            <p class="card-text small text-secondary mb-2"
+                                th:text="${song.genre != null ? song.genre.name : 'Unknown Genre'}">Genre</p>
+
+                            <p class="text-primary small mb-3 fw-bold">▶️ <span th:text="${song.playCount}">0</span>
+                                Plays</p>
+
+                            <div class="mb-3 w-100"
+                                th:if="${song.audioUrl != null and !song.audioUrl.trim().isEmpty()}">
+                                <audio controls class="w-100" style="height: 40px;">
+                                    <source th:src="@{/songs/play/{id}(id=${song.id})}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+
+                            <div class="mt-auto">
+                                <form method="post"
+                                    onsubmit="this.action='/playlists/' + this.playlistId.value + '/songs/' + this.songId.value; return true;">
+                                    <input type="hidden" name="songId" th:value="${song.id}" />
+                                    <select name="playlistId" class="form-select form-select-sm mb-2" required>
+                                        <option value="" disabled selected>Select Playlist</option>
+                                        <option th:each="playlist : ${playlists}" th:value="${playlist.id}"
+                                            th:text="${playlist.name}"></option>
+                                    </select>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
+                                        Add to Playlist
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+        </div>
+
+        <h3 class="fw-bold mb-3">All Available Songs</h3>
+
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${songs != null and !songs.isEmpty()}">
             <div class="col" th:each="song : ${songs}">
                 <div class="card h-100 shadow-sm border-0 rounded-3">
@@ -99,7 +177,7 @@
                             th:text="${song.genre != null ? song.genre.name : 'Unknown Genre'}">Genre</p>
                         <div class="mb-3 w-100" th:if="${song.audioUrl != null and !song.audioUrl.trim().isEmpty()}">
                             <audio controls class="w-100" style="height: 40px;">
-                                <source th:src="@{${song.audioUrl}}" type="audio/mpeg">
+                                <source th:src="@{/songs/play/{id}(id=${song.id})}" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
                         </div>

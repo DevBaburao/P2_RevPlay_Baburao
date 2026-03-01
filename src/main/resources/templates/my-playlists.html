@@ -23,6 +23,7 @@
             <div class="d-flex">
                 <div class="navbar-nav me-3">
                     <a class="nav-link active" th:href="@{/my-playlists}">My Playlists</a>
+                    <a class="nav-link" th:href="@{/liked-songs}">Liked Songs</a>
                     <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
                     <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/my-songs}">My Songs</a>
                 </div>
