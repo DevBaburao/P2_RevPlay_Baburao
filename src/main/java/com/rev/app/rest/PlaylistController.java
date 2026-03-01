@@ -24,6 +24,16 @@ public class PlaylistController {
         return "redirect:/my-playlists";
     }
 
+    @PostMapping("/playlists/create")
+    public String createPlaylist(@org.springframework.web.bind.annotation.RequestParam String name,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String description) {
+        com.rev.app.dto.PlaylistDTO dto = new com.rev.app.dto.PlaylistDTO();
+        dto.setName(name);
+        dto.setDescription(description);
+        playlistService.createPlaylist(dto);
+        return "redirect:/my-playlists";
+    }
+
     @Autowired
     private com.rev.app.repository.PlaylistRepository playlistRepository;
 
