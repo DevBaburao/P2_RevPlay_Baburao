@@ -21,11 +21,19 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/login", "/register").permitAll()
                         .requestMatchers(HttpMethod.GET).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/playlists/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll());
         return http.build();
     }
 

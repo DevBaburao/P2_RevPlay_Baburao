@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to RevPlay</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #1e1e1e, #2d0b3a, #0b1a3a);
+            color: #fff;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+
+        .hero .btn {
+            font-size: 1.25rem;
+            padding: 10px 30px;
+            margin: 10px;
+            border-radius: 30px;
+        }
+
+        .features {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+        }
+
+        .feature-card {
+            background: #fff;
+            padding: 40px 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #6a11cb;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 1.5rem;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #6a11cb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero"
+        th:style="'background-image: url(' + @{/images/hero-bg.jpg} + '); background-size: cover; background-position: center;'">
+        <div class="container">
+            <h1>Welcome to RevPlay</h1>
+            <p>Discover, Listen, and Enjoy Music Like Never Before</p>
+            <div>
+                <a th:href="@{/login}" class="btn btn-primary">Login</a>
+                <a th:href="@{/register}" class="btn btn-outline-light">Register</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img th:src="@{/images/headphones.jpg}" class="card-img-top mb-3" alt="Stream Music"
+                            style="border-radius: 10px; object-fit: cover; height: 200px;">
+                        <i class="fas fa-headphones feature-icon mt-2"></i>
+                        <h3>Stream Unlimited Music</h3>
+                        <p class="text-muted">Access millions of songs and podcasts from your favorite artists
+                            everywhere you go.</p>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img th:src="@{/images/playlist.jpg}" class="card-img-top mb-3" alt="Share Playlists"
+                            style="border-radius: 10px; object-fit: cover; height: 200px;">
+                        <i class="fas fa-list-ul feature-icon mt-2"></i>
+                        <h3>Create & Share Playlists</h3>
+                        <p class="text-muted">Curate the perfect personal soundtrack and share it easily with family and
+                            friends.</p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img th:src="@{/images/equalizer.jpg}" class="card-img-top mb-3" alt="Track Favorites"
+                            style="border-radius: 10px; object-fit: cover; height: 200px;">
+                        <i class="fas fa-heart feature-icon mt-2"></i>
+                        <h3>Track Favorites & History</h3>
+                        <p class="text-muted">Never lose a song. Keep tabs on everything you've played and easily
+                            favorite tracks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="container">
+            <div class="social-icons mb-3">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+            <p class="mb-0">&copy; 2026 RevPlay. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.css"></script>
+</body>
+
+</html>

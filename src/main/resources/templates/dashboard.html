@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>RevPlay - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">RevPlay</a>
+        <div class="d-flex">
+            <form th:action="@{/logout}" method="post">
+                <button class="btn btn-outline-light btn-sm" type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1>Welcome to RevPlay!</h1>
+            <p class="lead mt-3">Hello, <strong sec:authentication="name">User</strong>!</p>
+            <p>Your dashboard is ready.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
