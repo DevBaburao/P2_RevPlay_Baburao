@@ -76,4 +76,56 @@ public class FrontendController {
         model.addAttribute("albums", albumRepository.findAll());
         return "create-song";
     }
+
+    @GetMapping("/songs/edit/{id}")
+    public String editSongForm(@org.springframework.web.bind.annotation.PathVariable Long id,
+            org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
+        if (song == null || user == null || !song.getArtist().getId().equals(user.getId())) {
+            return "redirect:/my-songs";
+        }
+
+        model.addAttribute("song", song);
+        model.addAttribute("genres", genreRepository.findAll());
+        model.addAttribute("albums", albumRepository.findAll());
+        return "edit-song";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/songs/edit/{id}")
+    public String processEditSong(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.ModelAttribute com.rev.app.entity.Song updatedSong) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        com.rev.app.entity.Song existingSong = songRepository.findById(id).orElse(null);
+        if (existingSong != null && user != null && existingSong.getArtist().getId().equals(user.getId())) {
+            existingSong.setTitle(updatedSong.getTitle());
+            existingSong.setDuration(updatedSong.getDuration());
+            existingSong.setReleaseDate(updatedSong.getReleaseDate());
+            existingSong.setAudioUrl(updatedSong.getAudioUrl());
+            existingSong.setGenre(updatedSong.getGenre());
+            existingSong.setAlbum(updatedSong.getAlbum());
+            songRepository.save(existingSong);
+        }
+        return "redirect:/my-songs";
+    }
+
+    @GetMapping("/songs/delete/{id}")
+    public String deleteSong(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
+        if (song != null && user != null && song.getArtist().getId().equals(user.getId())) {
+            song.setIsDeleted(1);
+            songRepository.save(song);
+        }
+        return "redirect:/my-songs";
+    }
 }

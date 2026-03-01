@@ -22,6 +22,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/login", "/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/my-songs/**", "/songs/create", "/songs/edit/**",
+                                "/songs/delete/**")
+                        .hasRole("ARTIST")
                         .requestMatchers(HttpMethod.GET).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/songs/**").hasRole("ARTIST")
                         .requestMatchers(HttpMethod.PUT, "/api/songs/**").hasRole("ARTIST")

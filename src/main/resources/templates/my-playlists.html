@@ -24,6 +24,7 @@
                 <div class="navbar-nav me-3">
                     <a class="nav-link active" th:href="@{/my-playlists}">My Playlists</a>
                     <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                    <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/my-songs}">My Songs</a>
                 </div>
                 <form th:action="@{/logout}" method="post">
                     <button class="btn btn-outline-light btn-sm mt-1" type="submit">Logout</button>

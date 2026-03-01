@@ -65,9 +65,10 @@
                     <h6 class="card-subtitle mb-2 text-muted"
                         th:text="${song.artist.displayName != null ? song.artist.displayName : song.artist.username}">
                         Artist Name</h6>
-                    <div class="mt-auto pt-3 border-top border-secondary">
-                        <button class="btn btn-primary btn-sm me-2">Edit</button>
-                        <button class="btn btn-danger btn-sm">Delete</button>
+                    <div class="mt-auto pt-3 border-top border-secondary d-flex justify-content-between">
+                        <a th:href="@{/songs/edit/{id}(id=${song.id})}" class="btn btn-primary btn-sm px-4">Edit</a>
+                        <a th:href="@{/songs/delete/{id}(id=${song.id})}" class="btn btn-outline-danger btn-sm px-3"
+                            onclick="return confirm('Are you sure you want to delete this song?');">Delete</a>
                     </div>
                 </div>
             </div>
