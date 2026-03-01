@@ -83,6 +83,53 @@ public class FrontendController {
         return "create-song";
     }
 
+    @org.springframework.web.bind.annotation.PostMapping("/songs/create")
+    public String processCreateSong(
+            @org.springframework.web.bind.annotation.ModelAttribute com.rev.app.entity.Song newSong,
+            @org.springframework.web.bind.annotation.RequestParam("audioFile") org.springframework.web.multipart.MultipartFile audioFile,
+            org.springframework.ui.Model model) {
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            newSong.setArtist(user);
+
+            if (!audioFile.isEmpty()) {
+                try {
+                    String originalFilename = audioFile.getOriginalFilename();
+                    String fileExtension = "";
+                    if (originalFilename != null && originalFilename.contains(".")) {
+                        fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                    }
+                    String uniqueFilename = java.util.UUID.randomUUID().toString() + fileExtension;
+
+                    java.nio.file.Path uploadPath = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads");
+                    if (!java.nio.file.Files.exists(uploadPath)) {
+                        java.nio.file.Files.createDirectories(uploadPath);
+                    }
+
+                    java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
+                    java.nio.file.Files.copy(audioFile.getInputStream(), filePath,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    newSong.setAudioUrl("/uploads/" + uniqueFilename);
+
+                } catch (java.io.IOException e) {
+                    model.addAttribute("error", "Could not save audio file.");
+                    model.addAttribute("genres", genreRepository.findAll());
+                    model.addAttribute("albums", albumRepository.findAll());
+                    return "create-song";
+                }
+            }
+
+            songRepository.save(newSong);
+        }
+
+        return "redirect:/my-songs?created=true";
+    }
+
     @GetMapping("/songs/edit/{id}")
     public String editSongForm(@org.springframework.web.bind.annotation.PathVariable Long id,
             org.springframework.ui.Model model) {

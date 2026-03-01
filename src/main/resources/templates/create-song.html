@@ -72,13 +72,14 @@
     <div class="container d-flex justify-content-center">
         <div class="col-md-8 col-lg-6">
             <h2 class="mb-4 text-center">Upload New Song</h2>
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
             <div id="error-message" class="alert alert-danger d-none"></div>
 
             <div class="card p-4 shadow-lg">
-                <form id="createSongForm">
+                <form id="createSongForm" th:action="@{/songs/create}" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="title" class="form-label">Song Title <span class="text-danger">*</span></label>
-                        <input type="text" id="title" class="form-control" required
+                        <input type="text" id="title" name="title" class="form-control" required
                             placeholder="e.g. Bohemian Rhapsody">
                     </div>
 
@@ -86,18 +87,18 @@
                         <div class="col-md-6 mb-3">
                             <label for="duration" class="form-label">Duration (seconds) <span
                                     class="text-danger">*</span></label>
-                            <input type="number" id="duration" class="form-control" required min="1"
+                            <input type="number" id="duration" name="duration" class="form-control" required min="1"
                                 placeholder="e.g. 210">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="releaseDate" class="form-label">Release Date</label>
-                            <input type="date" id="releaseDate" class="form-control">
+                            <input type="date" id="releaseDate" name="releaseDate" class="form-control">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="genreId" class="form-label">Genre <span class="text-danger">*</span></label>
-                        <select id="genreId" class="form-select" required>
+                        <select id="genreId" name="genre" class="form-select" required>
                             <option value="" disabled selected>Select a Genre</option>
                             <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option>
                         </select>
@@ -105,7 +106,7 @@
 
                     <div class="mb-3">
                         <label for="albumId" class="form-label">Album (Optional)</label>
-                        <select id="albumId" class="form-select">
+                        <select id="albumId" name="album" class="form-select">
                             <option value="">No Album (Single)</option>
                             <option th:each="album : ${albums}" th:value="${album.id}" th:text="${album.name}">
                             </option>
@@ -113,8 +114,9 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="audioUrl" class="form-label">Audio URL</label>
-                        <input type="text" id="audioUrl" class="form-control" placeholder="/audio/my-song.mp3">
+                        <label for="audioFile" class="form-label">Audio File (.mp3) <span
+                                class="text-danger">*</span></label>
+                        <input type="file" id="audioFile" name="audioFile" class="form-control" accept=".mp3" required>
                     </div>
 
                     <div class="d-grid gap-2">
@@ -125,53 +127,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('createSongForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const title = document.getElementById('title').value;
-            const duration = parseInt(document.getElementById('duration').value);
-            const releaseDate = document.getElementById('releaseDate').value;
-            const genreId = document.getElementById('genreId').value;
-            const albumId = document.getElementById('albumId').value;
-            const audioUrl = document.getElementById('audioUrl').value;
-
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.classList.add('d-none');
-
-            const payload = {
-                title: title,
-                duration: duration,
-                genreId: genreId,
-                albumId: albumId ? albumId : null,
-                audioUrl: audioUrl,
-                releaseDate: releaseDate ? releaseDate : null
-            };
-
-            try {
-                const response = await fetch('/api/songs', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    window.location.href = '/my-songs?created=true';
-                } else {
-                    const text = await response.text();
-                    errorDiv.textContent = text || 'Failed to create song';
-                    errorDiv.classList.remove('d-none');
-                }
-            } catch (error) {
-                errorDiv.textContent = 'A network error occurred while uploading. Please try again.';
-                errorDiv.classList.remove('d-none');
-            }
-        });
-    </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
