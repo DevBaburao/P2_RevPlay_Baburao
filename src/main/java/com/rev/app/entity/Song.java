@@ -65,6 +65,9 @@ public class Song {
     @Column(name = "is_deleted")
     private Integer isDeleted = 0;
 
+    @jakarta.persistence.ManyToMany(mappedBy = "likedSongs")
+    private java.util.Set<User> likedByUsers = new java.util.HashSet<>();
+
     public Long getId() {
         return id;
     }
@@ -142,11 +145,11 @@ public class Song {
         this.fileSize = fileSize;
     }
 
-    public Date getReleaseDate() {
+    public java.sql.Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public void setReleaseDate(java.sql.Date releaseDate) {
         this.releaseDate = releaseDate;
     }
 
@@ -166,19 +169,19 @@ public class Song {
         this.status = status;
     }
 
-    public Timestamp getCreatedAt() {
+    public java.sql.Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(java.sql.Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public java.sql.Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(java.sql.Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -188,5 +191,13 @@ public class Song {
 
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public java.util.Set<User> getLikedByUsers() {
+        return likedByUsers;
+    }
+
+    public void setLikedByUsers(java.util.Set<User> likedByUsers) {
+        this.likedByUsers = likedByUsers;
     }
 }

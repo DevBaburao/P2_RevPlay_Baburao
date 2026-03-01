@@ -13,10 +13,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.sql.Timestamp;
 
-import java.util.List;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-
 @Entity
 @Table(name = "users")
 public class User {
@@ -58,8 +54,12 @@ public class User {
     @Column(name = "is_active")
     private Integer isActive = 1;
 
-    @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL)
-    private List<Song> songs;
+    @jakarta.persistence.OneToMany(mappedBy = "artist", cascade = jakarta.persistence.CascadeType.ALL)
+    private java.util.List<Song> songs;
+
+    @jakarta.persistence.ManyToMany
+    @jakarta.persistence.JoinTable(name = "user_liked_songs", joinColumns = @jakarta.persistence.JoinColumn(name = "user_id"), inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "song_id"))
+    private java.util.List<Song> likedSongs = new java.util.ArrayList<>();
 
     public Long getId() {
         return id;
@@ -125,19 +125,19 @@ public class User {
         this.profilePicture = profilePicture;
     }
 
-    public Timestamp getCreatedAt() {
+    public java.sql.Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(java.sql.Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public java.sql.Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(java.sql.Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -149,11 +149,19 @@ public class User {
         this.isActive = isActive;
     }
 
-    public List<Song> getSongs() {
+    public java.util.List<Song> getSongs() {
         return songs;
     }
 
-    public void setSongs(List<Song> songs) {
+    public void setSongs(java.util.List<Song> songs) {
         this.songs = songs;
+    }
+
+    public java.util.List<Song> getLikedSongs() {
+        return likedSongs;
+    }
+
+    public void setLikedSongs(java.util.List<Song> likedSongs) {
+        this.likedSongs = likedSongs;
     }
 }

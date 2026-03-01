@@ -51,6 +51,12 @@ public class FrontendController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", songPage.getTotalPages());
         model.addAttribute("playlists", playlistRepository.findAll());
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        model.addAttribute("user", user);
+
         return "dashboard";
     }
 
@@ -127,5 +133,52 @@ public class FrontendController {
             songRepository.save(song);
         }
         return "redirect:/my-songs";
+    }
+
+    @GetMapping("/songs/like/{id}")
+    public String likeSong(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestHeader(value = "referer", required = false) String referer) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
+
+        if (user != null && song != null && !user.getLikedSongs().contains(song)) {
+            user.getLikedSongs().add(song);
+            userRepository.save(user); // saves both due to cascading or many-to-many
+        }
+
+        return "redirect:" + (referer != null ? referer : "/dashboard");
+    }
+
+    @GetMapping("/songs/unlike/{id}")
+    public String unlikeSong(@org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestHeader(value = "referer", required = false) String referer) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
+
+        if (user != null && song != null && user.getLikedSongs().contains(song)) {
+            user.getLikedSongs().remove(song);
+            userRepository.save(user);
+        }
+
+        return "redirect:" + (referer != null ? referer : "/dashboard");
+    }
+
+    @GetMapping("/liked-songs")
+    public String likedSongs(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            model.addAttribute("songs", user.getLikedSongs());
+            model.addAttribute("playlists", playlistRepository.findAll());
+            model.addAttribute("user", user);
+        }
+
+        return "liked-songs";
     }
 }
