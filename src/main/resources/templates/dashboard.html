@@ -35,9 +35,22 @@
         </div>
 
         <!-- Available Songs Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3>Available Songs</h3>
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <h3 class="mb-0">Available Songs</h3>
+            </div>
+            <div class="col-md-6">
+                <form th:action="@{/dashboard}" method="get"
+                    class="d-flex justify-content-center justify-content-md-end">
+                    <input type="text" name="keyword"
+                        class="form-control form-control-sm w-auto d-inline-block me-2 rounded-pill px-3"
+                        placeholder="Search songs or artists..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Search</button>
+                    <a th:if="${keyword != null}" th:href="@{/dashboard}"
+                        class="btn btn-outline-secondary btn-sm rounded-pill px-3 ms-2">Clear</a>
+                </form>
+            </div>
+            <div class="col-12 mt-3">
                 <hr>
             </div>
         </div>

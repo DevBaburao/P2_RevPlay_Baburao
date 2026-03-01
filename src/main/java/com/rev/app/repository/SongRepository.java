@@ -18,4 +18,9 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByTitleContainingIgnoreCaseAndIsDeleted(String title, Integer isDeleted);
 
     Long countByArtistAndIsDeleted(ArtistProfile artist, Integer isDeleted);
+
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM Song s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(s.artist.artistName) LIKE LOWER(CONCAT('%', :artist, '%'))")
+    List<Song> findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(
+            @org.springframework.data.repository.query.Param("name") String name,
+            @org.springframework.data.repository.query.Param("artist") String artist);
 }

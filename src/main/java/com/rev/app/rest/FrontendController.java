@@ -24,8 +24,15 @@ public class FrontendController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(org.springframework.ui.Model model) {
-        model.addAttribute("songs", songRepository.findAll());
+    public String dashboard(@org.springframework.web.bind.annotation.RequestParam(required = false) String keyword,
+            org.springframework.ui.Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            model.addAttribute("songs", songRepository
+                    .findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(keyword.trim(), keyword.trim()));
+            model.addAttribute("keyword", keyword.trim());
+        } else {
+            model.addAttribute("songs", songRepository.findAll());
+        }
         model.addAttribute("playlists", playlistRepository.findAll());
         return "dashboard";
     }
