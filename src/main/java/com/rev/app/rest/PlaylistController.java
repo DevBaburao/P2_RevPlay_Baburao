@@ -18,6 +18,12 @@ public class PlaylistController {
         return "redirect:/dashboard";
     }
 
+    @PostMapping("/playlists/{playlistId}/remove/{songId}")
+    public String removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+        playlistService.removeSongFromPlaylist(playlistId, songId);
+        return "redirect:/my-playlists";
+    }
+
     @Autowired
     private com.rev.app.repository.PlaylistRepository playlistRepository;
 

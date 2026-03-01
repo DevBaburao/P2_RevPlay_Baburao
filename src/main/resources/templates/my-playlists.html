@@ -75,9 +75,15 @@
                                         th:text="${song.artist != null ? song.artist.artistName : 'Unknown Artist'}">Artist
                                         Name</span>
                                 </div>
-                                <div>
-                                    <span class="badge bg-secondary rounded-pill me-2"
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-secondary rounded-pill me-3"
                                         th:text="${song.genre != null ? song.genre.name : 'Unknown Genre'}">Genre</span>
+                                    <form
+                                        th:action="@{/playlists/{playlistId}/remove/{songId}(playlistId=${playlist.id}, songId=${song.id})}"
+                                        method="post" class="m-0">
+                                        <button type="submit"
+                                            class="btn btn-outline-danger btn-sm rounded-pill px-3">Remove</button>
+                                    </form>
                                 </div>
                             </li>
                         </ul>
