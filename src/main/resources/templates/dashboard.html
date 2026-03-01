@@ -69,6 +69,12 @@
                         </h6>
                         <p class="card-text small text-secondary mb-3"
                             th:text="${song.genre != null ? song.genre.name : 'Unknown Genre'}">Genre</p>
+                        <div class="mb-3 w-100" th:if="${song.audioUrl != null and !song.audioUrl.trim().isEmpty()}">
+                            <audio controls class="w-100" style="height: 40px;">
+                                <source th:src="@{${song.audioUrl}}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
 
                         <div class="mt-auto">
                             <form method="post"
