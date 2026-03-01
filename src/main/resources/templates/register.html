@@ -33,6 +33,13 @@
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
+                            <div class="mb-4">
+                                <label for="role" class="form-label">Account Type</label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="USER">Listener (User)</option>
+                                    <option value="ARTIST">Artist</option>
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-primary w-100">Register</button>
                         </form>
                         <div class="text-center mt-3">
@@ -52,6 +59,7 @@
             const email = document.getElementById('email').value;
             const displayName = document.getElementById('displayName').value;
             const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
 
             const errorDiv = document.getElementById('error-message');
             errorDiv.classList.add('d-none');
@@ -62,7 +70,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, email, displayName, password })
+                    body: JSON.stringify({ username, email, displayName, password, role })
                 });
 
                 if (response.status === 201) {

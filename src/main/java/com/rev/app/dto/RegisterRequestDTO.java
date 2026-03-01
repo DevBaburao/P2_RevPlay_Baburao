@@ -5,6 +5,7 @@ public class RegisterRequestDTO {
     private String username;
     private String password;
     private String displayName;
+    private String role;
 
     public String getEmail() {
         return email;
@@ -36,5 +37,13 @@ public class RegisterRequestDTO {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

@@ -24,7 +24,7 @@ public class Song {
 
     @ManyToOne
     @JoinColumn(name = "artist_id", nullable = false)
-    private ArtistProfile artist;
+    private User artist;
 
     @ManyToOne
     @JoinColumn(name = "album_id", nullable = true)
@@ -73,11 +73,11 @@ public class Song {
         this.id = id;
     }
 
-    public ArtistProfile getArtist() {
+    public User getArtist() {
         return artist;
     }
 
-    public void setArtist(ArtistProfile artist) {
+    public void setArtist(User artist) {
         this.artist = artist;
     }
 

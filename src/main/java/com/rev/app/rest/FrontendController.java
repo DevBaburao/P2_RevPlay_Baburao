@@ -13,6 +13,12 @@ public class FrontendController {
     @Autowired
     private com.rev.app.repository.PlaylistRepository playlistRepository;
 
+    @Autowired
+    private com.rev.app.repository.GenreRepository genreRepository;
+
+    @Autowired
+    private com.rev.app.repository.AlbumRepository albumRepository;
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -46,5 +52,28 @@ public class FrontendController {
         model.addAttribute("totalPages", songPage.getTotalPages());
         model.addAttribute("playlists", playlistRepository.findAll());
         return "dashboard";
+    }
+
+    @Autowired
+    private com.rev.app.repository.UserRepository userRepository;
+
+    @GetMapping("/my-songs")
+    public String mySongs(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            java.util.List<com.rev.app.entity.Song> mySongs = songRepository.findByArtist_IdAndIsDeleted(user.getId(),
+                    0);
+            model.addAttribute("songs", mySongs);
+        }
+        return "my-songs";
+    }
+
+    @GetMapping("/songs/create")
+    public String createSongForm(org.springframework.ui.Model model) {
+        model.addAttribute("genres", genreRepository.findAll());
+        model.addAttribute("albums", albumRepository.findAll());
+        return "create-song";
     }
 }

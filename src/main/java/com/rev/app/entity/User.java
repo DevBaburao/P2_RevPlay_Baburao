@@ -13,6 +13,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.sql.Timestamp;
 
+import java.util.List;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -53,6 +57,9 @@ public class User {
 
     @Column(name = "is_active")
     private Integer isActive = 1;
+
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL)
+    private List<Song> songs;
 
     public Long getId() {
         return id;
@@ -140,5 +147,13 @@ public class User {
 
     public void setIsActive(Integer isActive) {
         this.isActive = isActive;
+    }
+
+    public List<Song> getSongs() {
+        return songs;
+    }
+
+    public void setSongs(List<Song> songs) {
+        this.songs = songs;
     }
 }

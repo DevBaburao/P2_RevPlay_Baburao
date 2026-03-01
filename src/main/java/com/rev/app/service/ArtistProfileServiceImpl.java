@@ -99,15 +99,15 @@ public class ArtistProfileServiceImpl implements ArtistProfileService {
         ArtistProfile artist = artistProfileRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Artist profile not found for current user"));
 
-        Long totalSongs = songRepository.countByArtistAndIsDeleted(artist, 0);
-        Long totalPlays = listeningHistoryRepository.countTotalPlaysByArtist(artist);
-        Long totalFavorites = favoriteRepository.countTotalFavoritesByArtist(artist);
+        Long totalSongs = songRepository.countByArtistAndIsDeleted(artist.getUser(), 0);
+        Long totalPlays = listeningHistoryRepository.countTotalPlaysByArtist(artist.getUser());
+        Long totalFavorites = favoriteRepository.countTotalFavoritesByArtist(artist.getUser());
 
-        List<Object[]> mostPlayedDesc = listeningHistoryRepository.findMostPlayedSongByArtist(artist,
+        List<Object[]> mostPlayedResult = listeningHistoryRepository.findMostPlayedSongByArtist(artist.getUser(),
                 PageRequest.of(0, 1));
         SongPlayCountDTO mostPlayedSong = null;
-        if (!mostPlayedDesc.isEmpty()) {
-            Object[] obj = mostPlayedDesc.get(0);
+        if (!mostPlayedResult.isEmpty()) {
+            Object[] obj = mostPlayedResult.get(0);
             mostPlayedSong = new SongPlayCountDTO(songMapper.toDto((Song) obj[0]), (Long) obj[1]);
         }
 

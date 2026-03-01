@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Songs - RevPlay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+
+        .navbar {
+            background-color: #1DB954 !important;
+        }
+
+        .card {
+            background-color: #181818;
+        }
+
+        .text-muted {
+            color: #b3b3b3 !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark px-3">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">RevPlay</a>
+        <div class="collapse navbar-collapse d-flex justify-content-between">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/dashboard}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/my-playlists}">My Playlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active text-white fw-bold" th:href="@{/my-songs}">My Songs</a>
+                </li>
+            </ul>
+            <form th:action="@{/logout}" method="post" class="d-flex">
+                <button class="btn btn-outline-light" type="submit">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>My Songs</h2>
+        <hr class="border-secondary">
+
+        <!-- Add New Song Form / Trigger -->
+        <div class="mb-4">
+            <a th:href="@{/songs/create}" class="btn btn-success">Upload New Song</a>
+        </div>
+
+        <!-- Song List -->
+        <div th:if="${songs != null and !songs.empty}" class="row g-4">
+            <div class="col-md-6 col-lg-4" th:each="song : ${songs}">
+                <div class="card h-100 text-white p-3">
+                    <h5 class="card-title fw-bold" th:text="${song.title}">Song Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted"
+                        th:text="${song.artist.displayName != null ? song.artist.displayName : song.artist.username}">
+                        Artist Name</h6>
+                    <div class="mt-auto pt-3 border-top border-secondary">
+                        <button class="btn btn-primary btn-sm me-2">Edit</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${songs == null or songs.empty}" class="alert alert-dark text-center">
+            No songs found. Upload your first song!
+        </div>
+
+    </div>
+
+    <!-- Create Song Modal structure omitted for brevity, logic via API can be wired up later -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

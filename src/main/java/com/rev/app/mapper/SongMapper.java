@@ -1,7 +1,6 @@
 package com.rev.app.mapper;
 
 import com.rev.app.dto.SongDTO;
-import com.rev.app.entity.ArtistProfile;
 import com.rev.app.entity.Genre;
 import com.rev.app.entity.Song;
 import org.springframework.stereotype.Component;
@@ -40,7 +39,7 @@ public class SongMapper {
         return dto;
     }
 
-    public Song toEntity(SongDTO dto, ArtistProfile artist, Genre genre) {
+    public Song toEntity(SongDTO dto, com.rev.app.entity.User artist, Genre genre) {
         if (dto == null) {
             return null;
         }

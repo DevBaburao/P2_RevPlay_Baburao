@@ -112,7 +112,7 @@
                                 <div class="d-flex flex-column">
                                     <span class="fw-semibold" th:text="${song.title}">Song Title</span>
                                     <span class="text-secondary small"
-                                        th:text="${song.artist != null ? song.artist.artistName : 'Unknown Artist'}">Artist
+                                        th:text="${song.artist != null ? (song.artist.displayName != null ? song.artist.displayName : song.artist.username) : 'Unknown Artist'}">Artist
                                         Name</span>
                                 </div>
                                 <div class="d-flex align-items-center">

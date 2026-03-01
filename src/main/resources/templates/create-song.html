@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Song - RevPlay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+
+        .navbar {
+            background-color: #1DB954 !important;
+        }
+
+        .card {
+            background-color: #181818;
+            border-radius: 10px;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: #282828;
+            color: white;
+            border: none;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: #333;
+            color: white;
+            border-color: #1DB954;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: #1DB954;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #1ed760;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark px-3 mb-4">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">RevPlay</a>
+        <div class="collapse navbar-collapse d-flex justify-content-between">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/dashboard}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/my-playlists}">My Playlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/my-songs}">My Songs</a>
+                </li>
+            </ul>
+            <form th:action="@{/logout}" method="post" class="d-flex">
+                <button class="btn btn-outline-light" type="submit">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container d-flex justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <h2 class="mb-4 text-center">Upload New Song</h2>
+            <div id="error-message" class="alert alert-danger d-none"></div>
+
+            <div class="card p-4 shadow-lg">
+                <form id="createSongForm">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Song Title <span class="text-danger">*</span></label>
+                        <input type="text" id="title" class="form-control" required
+                            placeholder="e.g. Bohemian Rhapsody">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="duration" class="form-label">Duration (seconds) <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" id="duration" class="form-control" required min="1"
+                                placeholder="e.g. 210">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="releaseDate" class="form-label">Release Date</label>
+                            <input type="date" id="releaseDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="genreId" class="form-label">Genre <span class="text-danger">*</span></label>
+                        <select id="genreId" class="form-select" required>
+                            <option value="" disabled selected>Select a Genre</option>
+                            <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="albumId" class="form-label">Album (Optional)</label>
+                        <select id="albumId" class="form-select">
+                            <option value="">No Album (Single)</option>
+                            <option th:each="album : ${albums}" th:value="${album.id}" th:text="${album.name}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="audioUrl" class="form-label">Audio URL</label>
+                        <input type="text" id="audioUrl" class="form-control" placeholder="/audio/my-song.mp3">
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success fw-bold py-2">Publish Song</button>
+                        <a th:href="@{/my-songs}" class="btn btn-outline-secondary py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('createSongForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const releaseDate = document.getElementById('releaseDate').value;
+            const genreId = document.getElementById('genreId').value;
+            const albumId = document.getElementById('albumId').value;
+            const audioUrl = document.getElementById('audioUrl').value;
+
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.classList.add('d-none');
+
+            const payload = {
+                title: title,
+                duration: duration,
+                genreId: genreId,
+                albumId: albumId ? albumId : null,
+                audioUrl: audioUrl,
+                releaseDate: releaseDate ? releaseDate : null
+            };
+
+            try {
+                const response = await fetch('/api/songs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    window.location.href = '/my-songs?created=true';
+                } else {
+                    const text = await response.text();
+                    errorDiv.textContent = text || 'Failed to create song';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'A network error occurred while uploading. Please try again.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -23,6 +23,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/login", "/register").permitAll()
                         .requestMatchers(HttpMethod.GET).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/songs/**").hasRole("ARTIST")
+                        .requestMatchers(HttpMethod.PUT, "/api/songs/**").hasRole("ARTIST")
+                        .requestMatchers(HttpMethod.DELETE, "/api/songs/**").hasRole("ARTIST")
                         .requestMatchers(HttpMethod.POST, "/api/playlists/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
                         .anyRequest().authenticated())

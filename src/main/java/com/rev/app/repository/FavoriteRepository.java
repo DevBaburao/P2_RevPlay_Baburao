@@ -3,7 +3,6 @@ package com.rev.app.repository;
 import com.rev.app.entity.Favorite;
 import com.rev.app.entity.Song;
 import com.rev.app.entity.User;
-import com.rev.app.entity.ArtistProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +19,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     void deleteByUserAndSong(User user, Song song);
 
-    @Query("SELECT COUNT(f) FROM Favorite f WHERE f.song.artist = :artist AND f.song.isDeleted = 0")
-    Long countTotalFavoritesByArtist(@Param("artist") ArtistProfile artist);
+    @Query("SELECT COUNT(f) FROM Favorite f WHERE f.song.artist = :artist")
+    Long countTotalFavoritesByArtist(@Param("artist") User artist);
 }

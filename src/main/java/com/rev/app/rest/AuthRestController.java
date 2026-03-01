@@ -52,7 +52,14 @@ public class AuthRestController {
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER); // Default role
+
+        if (request.getRole() != null
+                && (request.getRole().equalsIgnoreCase("ARTIST") || request.getRole().equalsIgnoreCase("USER"))) {
+            user.setRole(Role.valueOf(request.getRole().toUpperCase()));
+        } else {
+            user.setRole(Role.USER); // Default role
+        }
+
         user.setDisplayName(request.getDisplayName());
 
         userRepository.save(user);
@@ -61,7 +68,8 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDTO request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDTO request,
+            HttpServletRequest httpServletRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
@@ -73,4 +81,3 @@ public class AuthRestController {
         return new ResponseEntity<>("User logged in successfully", HttpStatus.OK);
     }
 }
-

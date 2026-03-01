@@ -2,13 +2,11 @@ package com.rev.app.service;
 
 import com.rev.app.dto.SongDTO;
 import com.rev.app.entity.Album;
-import com.rev.app.entity.ArtistProfile;
 import com.rev.app.entity.Genre;
 import com.rev.app.entity.Song;
 import com.rev.app.exception.ResourceNotFoundException;
 import com.rev.app.mapper.SongMapper;
 import com.rev.app.repository.AlbumRepository;
-import com.rev.app.repository.ArtistProfileRepository;
 import com.rev.app.repository.GenreRepository;
 import com.rev.app.repository.SongRepository;
 import com.rev.app.repository.ListeningHistoryRepository;
@@ -29,35 +27,37 @@ import org.springframework.data.domain.Pageable;
 public class SongServiceImpl implements SongService {
 
     private final SongRepository songRepository;
-    private final ArtistProfileRepository artistProfileRepository;
     private final GenreRepository genreRepository;
     private final AlbumRepository albumRepository;
     private final ListeningHistoryRepository listeningHistoryRepository;
     private final SongMapper songMapper;
+    private final com.rev.app.repository.UserRepository userRepository;
 
     public SongServiceImpl(SongRepository songRepository,
-            ArtistProfileRepository artistProfileRepository,
             GenreRepository genreRepository,
             AlbumRepository albumRepository,
             ListeningHistoryRepository listeningHistoryRepository,
-            SongMapper songMapper) {
+            SongMapper songMapper,
+            com.rev.app.repository.UserRepository userRepository) {
         this.songRepository = songRepository;
-        this.artistProfileRepository = artistProfileRepository;
         this.genreRepository = genreRepository;
         this.albumRepository = albumRepository;
         this.listeningHistoryRepository = listeningHistoryRepository;
         this.songMapper = songMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
     public SongDTO createSong(SongDTO dto) {
-        ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artist not found with ID: " + dto.getArtistId()));
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         Genre genre = genreRepository.findById(dto.getGenreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Genre not found with ID: " + dto.getGenreId()));
 
-        Song entity = songMapper.toEntity(dto, artist, genre);
+        Song entity = songMapper.toEntity(dto, user, genre);
 
         if (dto.getAlbumId() != null) {
             Album album = albumRepository.findById(dto.getAlbumId())
@@ -96,13 +96,15 @@ public class SongServiceImpl implements SongService {
             throw new RuntimeException("Cannot update a deleted song");
         }
 
-        ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artist not found with ID: " + dto.getArtistId()));
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         Genre genre = genreRepository.findById(dto.getGenreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Genre not found with ID: " + dto.getGenreId()));
 
-        existingEntity.setArtist(artist);
+        existingEntity.setArtist(user);
 
         if (dto.getAlbumId() != null) {
             Album album = albumRepository.findById(dto.getAlbumId())
