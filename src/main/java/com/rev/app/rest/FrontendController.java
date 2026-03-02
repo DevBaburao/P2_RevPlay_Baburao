@@ -95,8 +95,13 @@ public class FrontendController {
 
     @GetMapping("/songs/create")
     public String createSongForm(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
         model.addAttribute("genres", genreRepository.findAll());
-        model.addAttribute("albums", albumRepository.findAll());
+        java.util.List<com.rev.app.entity.Album> artistAlbums = albumRepository.findByArtistUsername(username).stream()
+                .filter(a -> a.getIsDeleted() == 0)
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("albums", artistAlbums);
         return "create-song";
     }
 
@@ -136,7 +141,8 @@ public class FrontendController {
                 } catch (java.io.IOException e) {
                     model.addAttribute("error", "Could not save audio file.");
                     model.addAttribute("genres", genreRepository.findAll());
-                    model.addAttribute("albums", albumRepository.findAll());
+                    model.addAttribute("albums", albumRepository.findByArtistUsername(username).stream()
+                            .filter(a -> a.getIsDeleted() == 0).collect(java.util.stream.Collectors.toList()));
                     return "create-song";
                 }
             }
@@ -161,7 +167,10 @@ public class FrontendController {
 
         model.addAttribute("song", song);
         model.addAttribute("genres", genreRepository.findAll());
-        model.addAttribute("albums", albumRepository.findAll());
+        java.util.List<com.rev.app.entity.Album> artistAlbums = albumRepository.findByArtistUsername(username).stream()
+                .filter(a -> a.getIsDeleted() == 0)
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("albums", artistAlbums);
         return "edit-song";
     }
 
@@ -378,5 +387,148 @@ public class FrontendController {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // --- ALBUM ENDPOINTS ---
+
+    @GetMapping("/albums")
+    public String browseAlbums(org.springframework.ui.Model model) {
+        java.util.List<com.rev.app.entity.Album> albums = albumRepository.findByIsDeleted(0);
+        model.addAttribute("albums", albums);
+        return "albums";
+    }
+
+    @GetMapping("/albums/{id}")
+    public String viewAlbum(@org.springframework.web.bind.annotation.PathVariable Long id,
+            org.springframework.ui.Model model) {
+        com.rev.app.entity.Album album = albumRepository.findById(id).orElse(null);
+        if (album != null && album.getIsDeleted() == 0) {
+            model.addAttribute("album", album);
+            // Get active songs only
+            java.util.List<com.rev.app.entity.Song> activeSongs = album.getSongs().stream()
+                    .filter(s -> s.getIsDeleted() == 0)
+                    .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("songs", activeSongs);
+            return "album-detail";
+        }
+        return "redirect:/albums";
+    }
+
+    @GetMapping("/my-albums")
+    public String myAlbums(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null && user.getRole() == com.rev.app.entity.Role.ARTIST) {
+            java.util.List<com.rev.app.entity.Album> myAlbums = albumRepository.findByArtistUsername(username).stream()
+                    .filter(a -> a.getIsDeleted() == 0)
+                    .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("albums", myAlbums);
+            return "my-albums";
+        }
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/albums/create")
+    public String createAlbumForm(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null && user.getRole() == com.rev.app.entity.Role.ARTIST) {
+            return "create-album";
+        }
+        return "redirect:/dashboard";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/albums/create")
+    public String createAlbum(
+            @org.springframework.web.bind.annotation.RequestParam String name,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String description,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate releaseDate,
+            @org.springframework.web.bind.annotation.RequestParam(value = "coverImageFile", required = false) org.springframework.web.multipart.MultipartFile coverImageFile) {
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null && user.getRole() == com.rev.app.entity.Role.ARTIST) {
+            com.rev.app.entity.Album album = new com.rev.app.entity.Album();
+            album.setArtist(user);
+            album.setName(name);
+            album.setDescription(description);
+            album.setReleaseDate(releaseDate);
+
+            if (coverImageFile != null && !coverImageFile.isEmpty()) {
+                String coverUrl = saveUploadedFile(coverImageFile);
+                if (coverUrl != null) {
+                    album.setCoverImage(coverUrl);
+                }
+            }
+            albumRepository.save(album);
+            return "redirect:/my-albums";
+        }
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/albums/edit/{id}")
+    public String editAlbumForm(@org.springframework.web.bind.annotation.PathVariable Long id,
+            org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.Album album = albumRepository.findById(id).orElse(null);
+
+        if (album != null && album.getArtist().getUsername().equals(username)) {
+            model.addAttribute("album", album);
+            return "edit-album";
+        }
+        return "redirect:/my-albums";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/albums/edit/{id}")
+    public String updateAlbum(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam String name,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String description,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate releaseDate,
+            @org.springframework.web.bind.annotation.RequestParam(value = "coverImageFile", required = false) org.springframework.web.multipart.MultipartFile coverImageFile) {
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.Album album = albumRepository.findById(id).orElse(null);
+
+        if (album != null && album.getArtist().getUsername().equals(username)) {
+            album.setName(name);
+            album.setDescription(description);
+            album.setReleaseDate(releaseDate);
+
+            if (coverImageFile != null && !coverImageFile.isEmpty()) {
+                String coverUrl = saveUploadedFile(coverImageFile);
+                if (coverUrl != null) {
+                    album.setCoverImage(coverUrl);
+                }
+            }
+            albumRepository.save(album);
+        }
+        return "redirect:/my-albums";
+    }
+
+    @GetMapping("/albums/delete/{id}")
+    public String deleteAlbum(@org.springframework.web.bind.annotation.PathVariable Long id,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrs) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.Album album = albumRepository.findById(id).orElse(null);
+
+        if (album != null && album.getArtist().getUsername().equals(username)) {
+            long activeSongsCount = album.getSongs().stream().filter(s -> s.getIsDeleted() == 0).count();
+            if (activeSongsCount > 0) {
+                redirectAttrs.addFlashAttribute("error", "Cannot delete album. It still contains active songs.");
+            } else {
+                album.setIsDeleted(1);
+                albumRepository.save(album);
+                redirectAttrs.addFlashAttribute("success", "Album deleted successfully.");
+            }
+        }
+        return "redirect:/my-albums";
     }
 }

@@ -2,10 +2,10 @@ package com.rev.app.service;
 
 import com.rev.app.dto.AlbumDTO;
 import com.rev.app.entity.Album;
-import com.rev.app.entity.ArtistProfile;
+import com.rev.app.entity.User;
 import com.rev.app.exception.ResourceNotFoundException;
 import com.rev.app.repository.AlbumRepository;
-import com.rev.app.repository.ArtistProfileRepository;
+import com.rev.app.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,17 +16,21 @@ import java.util.stream.Collectors;
 public class AlbumServiceImpl implements AlbumService {
 
     private final AlbumRepository albumRepository;
-    private final ArtistProfileRepository artistProfileRepository;
+    private final UserRepository userRepository;
 
-    public AlbumServiceImpl(AlbumRepository albumRepository, ArtistProfileRepository artistProfileRepository) {
+    public AlbumServiceImpl(AlbumRepository albumRepository, UserRepository userRepository) {
         this.albumRepository = albumRepository;
-        this.artistProfileRepository = artistProfileRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public AlbumDTO createAlbum(AlbumDTO dto) {
-        ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
+        User artist = userRepository.findById(dto.getArtistId())
                 .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
+
+        if (artist.getRole() != com.rev.app.entity.Role.ARTIST) {
+            throw new IllegalArgumentException("User is not an artist");
+        }
 
         Album album = new Album();
         album.setArtist(artist);
@@ -60,8 +64,12 @@ public class AlbumServiceImpl implements AlbumService {
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Album not found"));
 
-        ArtistProfile artist = artistProfileRepository.findById(dto.getArtistId())
+        User artist = userRepository.findById(dto.getArtistId())
                 .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
+
+        if (artist.getRole() != com.rev.app.entity.Role.ARTIST) {
+            throw new IllegalArgumentException("User is not an artist");
+        }
 
         album.setArtist(artist);
         album.setName(dto.getName());
@@ -102,4 +110,5 @@ public class AlbumServiceImpl implements AlbumService {
 
         return dto;
     }
+
 }

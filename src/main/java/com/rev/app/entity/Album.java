@@ -1,5 +1,6 @@
 package com.rev.app.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,11 +8,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "albums")
@@ -23,12 +27,12 @@ public class Album {
 
     @ManyToOne
     @JoinColumn(name = "artist_id", nullable = false)
-    private ArtistProfile artist;
+    private User artist;
 
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(columnDefinition = "clob")
+    @Column(length = 500)
     private String description;
 
     @Column(name = "release_date")
@@ -44,6 +48,9 @@ public class Album {
     @Column(name = "is_deleted")
     private Integer isDeleted = 0;
 
+    @OneToMany(mappedBy = "album", cascade = CascadeType.ALL)
+    private List<Song> songs = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -52,11 +59,11 @@ public class Album {
         this.id = id;
     }
 
-    public ArtistProfile getArtist() {
+    public User getArtist() {
         return artist;
     }
 
-    public void setArtist(ArtistProfile artist) {
+    public void setArtist(User artist) {
         this.artist = artist;
     }
 
@@ -106,5 +113,13 @@ public class Album {
 
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public List<Song> getSongs() {
+        return songs;
+    }
+
+    public void setSongs(List<Song> songs) {
+        this.songs = songs;
     }
 }
