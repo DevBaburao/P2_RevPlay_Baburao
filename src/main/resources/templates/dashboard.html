@@ -46,7 +46,57 @@
             </div>
         </div>
     </nav>
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="container position-relative" style="z-index: 2;">
+            <p class="mb-1 text-white-50 text-uppercase tracking-wider fw-bold" style="letter-spacing: 2px;">Welcome
+                back to</p>
+            <h1 class="display-4 fw-bold mb-3">RevPlay</h1>
+            <p class="lead text-light opacity-75 mb-0" style="max-width: 600px;">
+                Your daily mix of endless music. Discover new artists, curate perfect playlists, and dive into the
+                sounds you love.
+            </p>
+        </div>
+    </div>
 
+    <!-- Advanced Search Section -->
+    <div class="container mb-5" style="margin-top: -30px; position: relative; z-index: 10;">
+        <div class="card shadow-sm border-0 rounded-4 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-search me-2 text-primary"></i>Advanced Search</h5>
+            <form th:action="@{/search}" method="get" class="row g-3 items-center">
+                <div class="col-md-3">
+                    <input type="text" name="keyword" class="form-control bg-light border-0"
+                        placeholder="Search song title, artist...">
+                </div>
+                <div class="col-md-2">
+                    <select name="genre" class="form-select bg-light border-0">
+                        <option value="">All Genres</option>
+                        <option th:each="g : ${genres}" th:value="${g.id}" th:text="${g.name}">Genre</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="artistId" class="form-select bg-light border-0">
+                        <option value="">All Artists</option>
+                        <option th:each="a : ${artists}" th:value="${a.id}"
+                            th:text="${a.displayName != null ? a.displayName : a.username}">Artist</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="albumId" class="form-select bg-light border-0">
+                        <option value="">All Albums</option>
+                        <option th:each="al : ${albums}" th:value="${al.id}" th:text="${al.name}">Album</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="year" class="form-control bg-light border-0"
+                        placeholder="Year (e.g. 2023)">
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="container mt-5">
         <div class="row mb-5">
             <div class="col-md-12 text-center">

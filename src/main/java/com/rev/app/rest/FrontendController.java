@@ -57,6 +57,9 @@ public class FrontendController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", songPage.getTotalPages());
         model.addAttribute("playlists", playlistRepository.findAll());
+        model.addAttribute("genres", genreRepository.findAll());
+        model.addAttribute("artists", userRepository.findByRole(com.rev.app.entity.Role.ARTIST));
+        model.addAttribute("albums", albumRepository.findByIsDeleted(0));
 
         String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .getAuthentication().getName();
