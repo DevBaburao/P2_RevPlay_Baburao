@@ -4,46 +4,104 @@
 <head>
     <title>RevPlay - Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .role-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .role-card.selected {
+            border-color: #0d6efd;
+            background-color: #f8faff;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
-            <div class="col-md-5">
-                <h2 class="text-center mb-4">RevPlay Register</h2>
-                <div id="error-message" class="alert alert-danger text-center d-none">
-                </div>
-                <div class="card shadow-sm">
-                    <div class="card-body">
+            <div class="col-md-7 col-lg-6">
+                <h2 class="text-center mb-4 fw-bold">Join RevPlay</h2>
+
+                <div id="error-message" class="alert alert-danger text-center d-none"></div>
+
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4 p-md-5">
                         <form id="registerForm">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required
-                                    autofocus>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="displayName" class="form-label">Display Name</label>
-                                <input type="text" class="form-control" id="displayName" name="displayName" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
+
+                            <!-- Step 1: Role Selection -->
                             <div class="mb-4">
-                                <label for="role" class="form-label">Account Type</label>
-                                <select class="form-select" id="role" name="role" required>
-                                    <option value="USER">Listener (User)</option>
-                                    <option value="ARTIST">Artist</option>
-                                </select>
+                                <label class="form-label fw-bold text-secondary mb-3">Select Account Type</label>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="card role-card selected h-100 p-3 text-center"
+                                            onclick="selectRole('USER')">
+                                            <h5 class="mb-1 fw-bold text-primary">🎧 Listener</h5>
+                                            <small class="text-muted">Stream music, build playlists, explore
+                                                genres.</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card role-card h-100 p-3 text-center"
+                                            onclick="selectRole('ARTIST')">
+                                            <h5 class="mb-1 fw-bold text-success">🎸 Artist</h5>
+                                            <small class="text-muted">Upload tracks, view analytics, reach fans.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="role" name="role" value="USER">
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
+
+                            <hr class="my-4">
+
+                            <!-- Base Fields -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="username" class="form-label fw-bold small">Username *</label>
+                                    <input type="text" class="form-control" id="username" required autofocus
+                                        placeholder="john_doe123">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-bold small">Email *</label>
+                                    <input type="email" class="form-control" id="email" required
+                                        placeholder="john@example.com">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-12">
+                                    <label for="password" class="form-label fw-bold small">Password *</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-12">
+                                    <label for="displayName" class="form-label fw-bold small"
+                                        id="displayNameLabel">Display Name *</label>
+                                    <input type="text" class="form-control" id="displayName" name="displayName" required
+                                        placeholder="John Doe">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-12">
+                                    <label for="bio" class="form-label fw-bold small">Bio (Optional)</label>
+                                    <textarea class="form-control" id="bio" rows="2"
+                                        placeholder="Tell us about yourself..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Removed Artist Fields -->
+
+
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mt-4 shadow-sm"
+                                id="submitBtn">Create listener account</button>
                         </form>
-                        <div class="text-center mt-3">
-                            <a th:href="@{/login}">Already have an account? Login here</a>
+                        <div class="text-center mt-4">
+                            <a th:href="@{/login}" class="text-decoration-none">Already have an account? Log in
+                                securely</a>
                         </div>
                     </div>
                 </div>
@@ -52,25 +110,58 @@
     </div>
 
     <script>
+        function selectRole(role) {
+            document.getElementById('role').value = role;
+
+            const cards = document.querySelectorAll('.role-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            const submitBtn = document.getElementById('submitBtn');
+            const displayNameLabel = document.getElementById('displayNameLabel');
+
+            if (role === 'ARTIST') {
+                submitBtn.textContent = 'Create artist account';
+                submitBtn.classList.replace('btn-primary', 'btn-success');
+                displayNameLabel.textContent = 'Artist Name / Band Name *';
+            } else {
+                submitBtn.textContent = 'Create listener account';
+                submitBtn.classList.replace('btn-success', 'btn-primary');
+                displayNameLabel.textContent = 'Display Name *';
+            }
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            const role = document.getElementById('role').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
-            const displayName = document.getElementById('displayName').value;
             const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
+            const displayName = document.getElementById('displayName').value;
+            const bio = document.getElementById('bio').value;
+
+            // Base Payload
+            const payload = { role, username, email, password, displayName, bio };
+
+            if (role === 'ARTIST') {
+                payload.artistName = displayName;
+            }
 
             const errorDiv = document.getElementById('error-message');
             errorDiv.classList.add('d-none');
 
+            // Hardcode disable button to prevent double submissions
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, email, displayName, password, role })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
                 if (response.status === 201) {
@@ -79,10 +170,14 @@
                     const text = await response.text();
                     errorDiv.textContent = text || 'Registration failed';
                     errorDiv.classList.remove('d-none');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
                 }
             } catch (error) {
                 errorDiv.textContent = 'Network error occurred. Please try again.';
                 errorDiv.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
     </script>

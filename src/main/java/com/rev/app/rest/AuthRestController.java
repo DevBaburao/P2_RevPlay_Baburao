@@ -31,12 +31,14 @@ public class AuthRestController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.rev.app.repository.ArtistProfileRepository artistProfileRepository;
 
     public AuthRestController(AuthenticationManager authenticationManager, UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, com.rev.app.repository.ArtistProfileRepository artistProfileRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.artistProfileRepository = artistProfileRepository;
     }
 
     @PostMapping("/register")
@@ -61,8 +63,31 @@ public class AuthRestController {
         }
 
         user.setDisplayName(request.getDisplayName());
+        user.setBio(request.getBio());
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // If registering as an ARTIST, dynamically initialize their ArtistProfile
+        if (savedUser.getRole() == Role.ARTIST) {
+            com.rev.app.entity.ArtistProfile artistProfile = new com.rev.app.entity.ArtistProfile();
+            artistProfile.setUser(savedUser);
+            artistProfile
+                    .setArtistName(request.getArtistName() != null ? request.getArtistName() : request.getUsername());
+            artistProfile.setInstagramLink(request.getInstagramUrl());
+            artistProfile.setTwitterLink(request.getTwitterUrl());
+            artistProfile.setYoutubeLink(request.getYoutubeUrl());
+            artistProfile.setWebsiteLink(request.getWebsiteUrl());
+
+            // Try to parse primaryGenre as an ID safely, otherwise leave null
+            if (request.getPrimaryGenre() != null && !request.getPrimaryGenre().trim().isEmpty()) {
+                try {
+                    artistProfile.setGenreId(Long.parseLong(request.getPrimaryGenre()));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+            artistProfileRepository.save(artistProfile);
+        }
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }

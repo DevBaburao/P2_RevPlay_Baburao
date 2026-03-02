@@ -19,6 +19,12 @@ public class FrontendController {
     @Autowired
     private com.rev.app.repository.AlbumRepository albumRepository;
 
+    @Autowired
+    private com.rev.app.repository.ArtistProfileRepository artistProfileRepository;
+
+    @Autowired
+    private com.rev.app.repository.UserRepository userRepository;
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -73,9 +79,6 @@ public class FrontendController {
         }
         return "redirect:/dashboard";
     }
-
-    @Autowired
-    private com.rev.app.repository.UserRepository userRepository;
 
     @GetMapping("/my-songs")
     public String mySongs(org.springframework.ui.Model model) {
@@ -241,5 +244,139 @@ public class FrontendController {
         }
 
         return "liked-songs";
+    }
+
+    @GetMapping("/profile")
+    public String viewProfile(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            model.addAttribute("user", user);
+            // Count total favorites
+            model.addAttribute("totalFavorites", user.getLikedSongs().size());
+
+            if (user.getRole() == com.rev.app.entity.Role.ARTIST) {
+                com.rev.app.entity.ArtistProfile artistProfile = artistProfileRepository.findByUserId(user.getId())
+                        .orElse(null);
+                model.addAttribute("artistProfile", artistProfile);
+                // Note: count totalPlaylists, totalPlays for Artist here if needed
+                return "artist-profile";
+            }
+
+            // Note: count totalPlaylists for formatting
+            long playlistCount = playlistRepository.findAll().stream().count();
+            model.addAttribute("totalPlaylists", playlistCount);
+
+            return "profile";
+        }
+        return "redirect:/login";
+    }
+
+    @GetMapping("/artist/{username}")
+    public String viewPublicArtistProfile(@org.springframework.web.bind.annotation.PathVariable String username,
+            org.springframework.ui.Model model) {
+        com.rev.app.entity.User artistUser = userRepository.findByUsername(username).orElse(null);
+        if (artistUser != null && artistUser.getRole() == com.rev.app.entity.Role.ARTIST) {
+            model.addAttribute("artistUser", artistUser);
+            com.rev.app.entity.ArtistProfile artistProfile = artistProfileRepository.findByUserId(artistUser.getId())
+                    .orElse(null);
+            model.addAttribute("artistProfile", artistProfile);
+            return "public-artist";
+        }
+        return "redirect:/dashboard"; // Not found or not an artist
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/profile/update")
+    public String updateProfile(
+            @org.springframework.web.bind.annotation.RequestParam String displayName,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String bio) {
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            user.setDisplayName(displayName);
+            user.setBio(bio);
+            userRepository.save(user);
+        }
+        return "redirect:/profile";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/profile/update-artist")
+    public String updateArtistProfile(
+            @org.springframework.web.bind.annotation.RequestParam String artistName,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long genreId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String bio,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String instagramLink,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String twitterLink,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String youtubeLink,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String spotifyLink,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String websiteLink,
+            @org.springframework.web.bind.annotation.RequestParam(value = "profilePictureFile", required = false) org.springframework.web.multipart.MultipartFile profilePictureFile,
+            @org.springframework.web.bind.annotation.RequestParam(value = "bannerImageFile", required = false) org.springframework.web.multipart.MultipartFile bannerImageFile) {
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null && user.getRole() == com.rev.app.entity.Role.ARTIST) {
+            user.setBio(bio);
+
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                String ppUrl = saveUploadedFile(profilePictureFile);
+                if (ppUrl != null) {
+                    user.setProfilePicture(ppUrl);
+                }
+            }
+            userRepository.save(user);
+
+            com.rev.app.entity.ArtistProfile artistProfile = artistProfileRepository.findByUserId(user.getId())
+                    .orElse(new com.rev.app.entity.ArtistProfile());
+            if (artistProfile.getUser() == null) {
+                artistProfile.setUser(user);
+            }
+            artistProfile.setArtistName(artistName);
+            artistProfile.setGenreId(genreId);
+            artistProfile.setInstagramLink(instagramLink);
+            artistProfile.setTwitterLink(twitterLink);
+            artistProfile.setYoutubeLink(youtubeLink);
+            artistProfile.setSpotifyLink(spotifyLink);
+            artistProfile.setWebsiteLink(websiteLink);
+
+            if (bannerImageFile != null && !bannerImageFile.isEmpty()) {
+                String bannerUrl = saveUploadedFile(bannerImageFile);
+                if (bannerUrl != null) {
+                    artistProfile.setBannerImage(bannerUrl);
+                }
+            }
+
+            artistProfileRepository.save(artistProfile);
+        }
+        return "redirect:/profile";
+    }
+
+    private String saveUploadedFile(org.springframework.web.multipart.MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.lastIndexOf(".") > 0) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String uniqueFilename = java.util.UUID.randomUUID().toString() + fileExtension;
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads");
+            if (!java.nio.file.Files.exists(uploadPath)) {
+                java.nio.file.Files.createDirectories(uploadPath);
+            }
+            java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
+            java.nio.file.Files.copy(file.getInputStream(), filePath,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            return "/uploads/" + uniqueFilename;
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

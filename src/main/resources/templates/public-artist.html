@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>RevPlay - Artist Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .banner-container {
+            height: 300px;
+            background-color: #343a40;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border: 6px solid white;
+            position: absolute;
+            bottom: -90px;
+            left: 40px;
+            background-color: white;
+        }
+
+        .song-card {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .song-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white d-flex align-items-center" th:href="@{/dashboard}">
+                <i class="bi bi-music-note-beamed me-2"></i> RevPlay
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Home</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a th:href="@{/dashboard}" class="btn btn-outline-light btn-sm">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Banner & Picture Header -->
+        <div class="card shadow rounded-4 overflow-hidden mb-5 border-0">
+            <div class="banner-container"
+                th:style="${artistProfile != null && artistProfile.bannerImage != null ? 'background-image: url(' + artistProfile.bannerImage + ');' : ''}">
+                <img th:src="${artistUser.profilePicture != null ? artistUser.profilePicture : 'https://ui-avatars.com/api/?name=' + artistUser.displayName + '&background=random'}"
+                    class="rounded-circle profile-pic shadow-lg">
+            </div>
+            <div class="card-body bg-white" style="padding-top: 100px; padding-left: 40px; padding-bottom: 30px;">
+                <h1 class="fw-bold mb-1"
+                    th:text="${artistProfile != null && artistProfile.artistName != null ? artistProfile.artistName : artistUser.displayName}">
+                    Artist Name</h1>
+                <p class="text-muted d-flex align-items-center mb-3">
+                    <span class="badge bg-primary rounded-pill px-3 py-2 me-3"><i
+                            class="bi bi-patch-check-fill me-1"></i> Verified Artist</span>
+                    @<span th:text="${artistUser.username}">username</span>
+                </p>
+
+                <div class="d-flex gap-3 align-items-center">
+                    <div th:if="${artistProfile != null}">
+                        <a th:if="${artistProfile.spotifyLink != null and !artistProfile.spotifyLink.empty}"
+                            th:href="${artistProfile.spotifyLink}" target="_blank"
+                            class="btn btn-success rounded-pill px-4 fw-bold"><i
+                                class="bi bi-spotify me-2"></i>Spotify</a>
+                        <a th:if="${artistProfile.instagramLink != null and !artistProfile.instagramLink.empty}"
+                            th:href="${artistProfile.instagramLink}" target="_blank"
+                            class="btn btn-outline-danger rounded-circle"><i class="bi bi-instagram"></i></a>
+                        <a th:if="${artistProfile.twitterLink != null and !artistProfile.twitterLink.empty}"
+                            th:href="${artistProfile.twitterLink}" target="_blank"
+                            class="btn btn-outline-dark rounded-circle"><i class="bi bi-twitter-x"></i></a>
+                        <a th:if="${artistProfile.youtubeLink != null and !artistProfile.youtubeLink.empty}"
+                            th:href="${artistProfile.youtubeLink}" target="_blank"
+                            class="btn btn-outline-danger rounded-circle"><i class="bi bi-youtube"></i></a>
+                        <a th:if="${artistProfile.websiteLink != null and !artistProfile.websiteLink.empty}"
+                            th:href="${artistProfile.websiteLink}" target="_blank"
+                            class="btn btn-outline-secondary rounded-circle"><i class="bi bi-globe"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Bio & Info -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top: 80px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">About</h5>
+                        <p class="text-secondary"
+                            th:text="${artistUser.bio != null and !artistUser.bio.empty ? artistUser.bio : 'This artist hasn\'t added a bio yet.'}">
+                            Artist Bio</p>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted fw-bold">Followers</span>
+                            <span class="fw-bold text-dark"
+                                th:text="${artistUser.likedSongs != null ? artistUser.likedSongs.size() : 0}">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted fw-bold">Published Tracks</span>
+                            <span class="fw-bold text-dark" th:text="${artistUser.songs.size()}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Tracks -->
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-4">Popular Tracks</h4>
+
+                <div th:if="${artistUser.songs.empty}">
+                    <div class="alert alert-light text-center p-5 rounded-4 shadow-sm border">
+                        <i class="bi bi-music-note-list text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted">No tracks published yet.</h5>
+                    </div>
+                </div>
+
+                <div class="row g-3" th:if="${!artistUser.songs.empty}">
+                    <div class="col-12" th:each="song : ${artistUser.songs}" th:unless="${song.isDeleted == 1}">
+                        <div class="card song-card shadow-sm border-0 rounded-4 overflow-hidden">
+                            <div class="d-flex align-items-center p-3">
+                                <div class="bg-dark text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                                    style="width: 60px; height: 60px;">
+                                    <i class="bi bi-music-note-beamed fs-3"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1 fw-bold text-dark" th:text="${song.title}">Song Title</h5>
+                                    <small class="text-muted">
+                                        <i class="bi bi-play-circle-fill me-1"></i> <span
+                                            th:text="${song.playCount}">0</span> plays •
+                                        <i class="bi bi-calendar3 me-1"></i> <span
+                                            th:text="${#calendars.format(song.releaseDate, 'MMM yyyy')}">Date</span>
+                                    </small>
+                                </div>
+                                <div>
+                                    <audio controls class="form-control-sm border-0"
+                                        style="height: 40px; width: 250px;">
+                                        <source th:src="@{/songs/play/{id}(id=${song.id})}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

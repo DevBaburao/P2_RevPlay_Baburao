@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>RevPlay - Artist Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .banner-container {
+            height: 250px;
+            background-color: #343a40;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border: 5px solid white;
+            position: absolute;
+            bottom: -80px;
+            left: 40px;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white d-flex align-items-center" th:href="@{/dashboard}">
+                <i class="bi bi-music-note-beamed me-2"></i> RevPlay
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/my-songs}">My Tracks</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Banner & Picture Header -->
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+            <div class="banner-container"
+                th:style="${artistProfile != null && artistProfile.bannerImage != null ? 'background-image: url(' + artistProfile.bannerImage + ');' : ''}">
+                <img th:src="${user.profilePicture != null ? user.profilePicture : 'https://ui-avatars.com/api/?name=' + user.displayName + '&background=random'}"
+                    class="rounded-circle profile-pic shadow">
+            </div>
+            <div class="card-body" style="padding-top: 90px; padding-left: 40px;">
+                <h2 class="fw-bold mb-0"
+                    th:text="${artistProfile != null ? artistProfile.artistName : user.displayName}">Artist Name</h2>
+                <p class="text-muted d-flex align-items-center mt-1">
+                    <span class="badge bg-success rounded-pill px-3 py-2 me-3"><i
+                            class="bi bi-patch-check-fill me-1"></i> Verified Artist</span>
+                    @<span th:text="${user.username}">username</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Metrics & Links -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Artist Stats</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Total Liked</span>
+                            <span class="fw-bold" th:text="${totalFavorites}">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Total Tracks</span>
+                            <span class="fw-bold" th:text="${user.songs.size()}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Social Links</h5>
+                        <ul class="list-unstyled mb-0" th:if="${artistProfile != null}">
+                            <li class="mb-2"
+                                th:if="${artistProfile.instagramLink != null and !artistProfile.instagramLink.empty}"><i
+                                    class="bi bi-instagram text-danger me-2"></i> <a
+                                    th:href="${artistProfile.instagramLink}" target="_blank"
+                                    class="text-decoration-none">Instagram</a></li>
+                            <li class="mb-2"
+                                th:if="${artistProfile.twitterLink != null and !artistProfile.twitterLink.empty}"><i
+                                    class="bi bi-twitter-x text-dark me-2"></i> <a
+                                    th:href="${artistProfile.twitterLink}" target="_blank"
+                                    class="text-decoration-none">Twitter</a></li>
+                            <li class="mb-2"
+                                th:if="${artistProfile.youtubeLink != null and !artistProfile.youtubeLink.empty}"><i
+                                    class="bi bi-youtube text-danger me-2"></i> <a
+                                    th:href="${artistProfile.youtubeLink}" target="_blank"
+                                    class="text-decoration-none">YouTube</a></li>
+                            <li th:if="${artistProfile.websiteLink != null and !artistProfile.websiteLink.empty}"><i
+                                    class="bi bi-globe me-2"></i> <a th:href="${artistProfile.websiteLink}"
+                                    target="_blank" class="text-decoration-none">Website</a></li>
+                        </ul>
+                        <p class="text-muted small mb-0"
+                            th:if="${artistProfile == null or (artistProfile.instagramLink == null and artistProfile.twitterLink == null and artistProfile.youtubeLink == null and artistProfile.websiteLink == null)}">
+                            No social links added yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Edit Form -->
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Edit Profile</h5>
+
+                        <form method="POST" th:action="@{/profile/update-artist}" enctype="multipart/form-data">
+
+                            <!-- Image Uploads -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Profile Picture</label>
+                                    <input type="file" class="form-control form-control-sm" name="profilePictureFile"
+                                        accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Banner Image</label>
+                                    <input type="file" class="form-control form-control-sm" name="bannerImageFile"
+                                        accept="image/*">
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Artist Name</label>
+                                    <input type="text" class="form-control" name="artistName"
+                                        th:value="${artistProfile != null ? artistProfile.artistName : ''}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Primary Genre</label>
+                                    <input type="number" class="form-control" name="genreId"
+                                        th:value="${artistProfile != null ? artistProfile.genreId : ''}"
+                                        placeholder="Genre ID">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-muted small fw-bold">Biography</label>
+                                    <textarea class="form-control" name="bio" rows="4" th:text="${user.bio}"></textarea>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h6 class="fw-bold text-secondary mb-3">Social & Web Links</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="bi bi-instagram"></i></span>
+                                        <input type="url" class="form-control" name="instagramLink"
+                                            th:value="${artistProfile != null ? artistProfile.instagramLink : ''}"
+                                            placeholder="Instagram URL">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="bi bi-twitter-x"></i></span>
+                                        <input type="url" class="form-control" name="twitterLink"
+                                            th:value="${artistProfile != null ? artistProfile.twitterLink : ''}"
+                                            placeholder="Twitter URL">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="bi bi-youtube"></i></span>
+                                        <input type="url" class="form-control" name="youtubeLink"
+                                            th:value="${artistProfile != null ? artistProfile.youtubeLink : ''}"
+                                            placeholder="YouTube URL">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="bi bi-spotify"></i></span>
+                                        <input type="url" class="form-control" name="spotifyLink"
+                                            th:value="${artistProfile != null ? artistProfile.spotifyLink : ''}"
+                                            placeholder="Spotify URL">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                                        <input type="url" class="form-control" name="websiteLink"
+                                            th:value="${artistProfile != null ? artistProfile.websiteLink : ''}"
+                                            placeholder="Website URL">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-between">
+                                <a th:href="@{/artist/{username}(username=${user.username})}" target="_blank"
+                                    class="btn btn-outline-primary fw-bold px-4">View Public Profile</a>
+                                <button type="submit" class="btn btn-success fw-bold px-4">Update Profile</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
