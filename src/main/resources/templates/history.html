@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>RevPlay - Listening History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/dashboard}">RevPlay</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/my-playlists}">My Playlists</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/liked-songs}">Liked Songs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" th:href="@{/history}">History</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ARTIST')">
+                        <a class="nav-link" th:href="@{/my-albums}">My Albums</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ARTIST')">
+                        <a class="nav-link" th:href="@{/my-songs}">My Songs</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="d-flex align-items-center">
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button class="btn btn-outline-light btn-sm" type="submit">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="fw-bold">Your Recently Played</h1>
+                <p class="text-muted">A look back at the last 50 tracks you grooved to.</p>
+            </div>
+            <div class="col-md-4 text-md-end text-center">
+                <a th:href="@{/history/all}" class="btn btn-outline-primary mb-2 me-2">View Comprehensive History</a>
+                <form th:action="@{/history/clear}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger mb-2"
+                        onclick="return confirm('Are you sure you want to clear your entire listening history? This cannot be undone.')">Clear
+                        All</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div th:if="${history == null or history.isEmpty()}" class="p-5 text-center text-muted">
+                    <h4>No history yet.</h4>
+                    <p>Start listening to some songs to build up your history!</p>
+                    <a th:href="@{/dashboard}" class="btn btn-primary mt-2">Go to Dashboard</a>
+                </div>
+
+                <div class="table-responsive" th:if="${history != null and !history.isEmpty()}">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4">Song Name</th>
+                                <th scope="col">Artist</th>
+                                <th scope="col">Played On</th>
+                                <th scope="col" class="text-center pe-4">Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${history}">
+                                <td class="ps-4 fw-bold" th:text="${entry.song.title}">Song Title</td>
+                                <td>
+                                    <a th:href="@{/artist/{username}(username=${entry.song.artist.username})}"
+                                        th:text="${entry.song.artist.displayName != null ? entry.song.artist.displayName : entry.song.artist.username}"
+                                        class="text-decoration-none text-muted">Artist Name</a>
+                                </td>
+                                <td th:text="${#calendars.format(entry.playedAt, 'MMM dd, yyyy HH:mm')}">Date</td>
+                                <td class="text-center pe-4">
+                                    <a th:href="@{/songs/play/{id}(id=${entry.song.id})}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary rounded-circle" title="Replay">
+                                        ▶
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

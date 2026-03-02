@@ -69,12 +69,28 @@ public class FrontendController {
         return "dashboard";
     }
 
+    @Autowired
+    private com.rev.app.repository.ListeningHistoryRepository listeningHistoryRepository;
+
     @GetMapping("/songs/play/{id}")
     public String playSong(@org.springframework.web.bind.annotation.PathVariable Long id) {
         com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
         if (song != null) {
             song.setPlayCount(song.getPlayCount() + 1);
             songRepository.save(song);
+
+            String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                    .getAuthentication().getName();
+            if (username != null && !username.equals("anonymousUser")) {
+                com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+                if (user != null) {
+                    com.rev.app.entity.ListeningHistory history = new com.rev.app.entity.ListeningHistory();
+                    history.setUser(user);
+                    history.setSong(song);
+                    listeningHistoryRepository.save(history);
+                }
+            }
+
             return "redirect:" + song.getAudioUrl();
         }
         return "redirect:/dashboard";
@@ -530,5 +546,43 @@ public class FrontendController {
             }
         }
         return "redirect:/my-albums";
+    }
+
+    @GetMapping("/history")
+    public String getListeningHistory(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            java.util.List<com.rev.app.entity.ListeningHistory> history = listeningHistoryRepository
+                    .findTop50ByUserOrderByPlayedAtDesc(user);
+            model.addAttribute("history", history);
+        }
+        return "history";
+    }
+
+    @GetMapping("/history/all")
+    public String getAllListeningHistory(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            java.util.List<com.rev.app.entity.ListeningHistory> history = listeningHistoryRepository
+                    .findByUserOrderByPlayedAtDesc(user);
+            model.addAttribute("history", history);
+        }
+        return "history-all";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/history/clear")
+    public String clearListeningHistory(org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrs) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            listeningHistoryRepository.deleteByUser(user);
+            redirectAttrs.addFlashAttribute("success", "Listening history cleared successfully.");
+        }
+        return "redirect:/history";
     }
 }

@@ -17,6 +17,12 @@ import java.util.List;
 public interface ListeningHistoryRepository extends JpaRepository<ListeningHistory, Long> {
         List<ListeningHistory> findTop50ByUserOrderByPlayedAtDesc(User user);
 
+        List<ListeningHistory> findByUserOrderByPlayedAtDesc(User user);
+
+        @org.springframework.transaction.annotation.Transactional
+        @org.springframework.data.jpa.repository.Modifying
+        void deleteByUser(User user);
+
         @Query("SELECT h.song, COUNT(h) FROM ListeningHistory h WHERE h.song.isDeleted = 0 GROUP BY h.song ORDER BY COUNT(h) DESC")
         List<Object[]> findTopPlayedSongs(Pageable pageable);
 

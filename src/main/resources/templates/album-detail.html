@@ -75,6 +75,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Home</a></li>
                     <li class="nav-item"><a class="nav-link fw-bold" th:href="@{/albums}">Browse Albums</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/history}">History</a></li>
                 </ul>
             </div>
         </div>
@@ -177,7 +178,8 @@
         <div class="mt-5 text-muted small">
             <p>℗ <span
                     th:text="${album.releaseDate != null ? #temporals.format(album.releaseDate, 'yyyy') : '2023'}"></span>
-                <span th:text="${album.artist.displayName}">Artist</span></p>
+                <span th:text="${album.artist.displayName}">Artist</span>
+            </p>
         </div>
     </div>
 
