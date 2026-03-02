@@ -27,6 +27,7 @@
                     <a class="nav-link" th:href="@{/liked-songs}">Liked Songs</a>
                     <a class="nav-link" th:href="@{/history}">History</a>
                     <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                    <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/artist/dashboard}">Analytics</a>
                     <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/my-albums}">My Albums</a>
                     <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/my-songs}">My Songs</a>
                 </div>

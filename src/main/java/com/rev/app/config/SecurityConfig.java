@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/songs/**").hasRole("ARTIST")
                         .requestMatchers(HttpMethod.PUT, "/api/songs/**").hasRole("ARTIST")
                         .requestMatchers(HttpMethod.DELETE, "/api/songs/**").hasRole("ARTIST")
+                        .requestMatchers(HttpMethod.GET, "/artist/dashboard").hasRole("ARTIST")
                         .requestMatchers(HttpMethod.POST, "/api/playlists/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/history/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/history/**").authenticated()

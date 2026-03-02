@@ -37,4 +37,7 @@ public interface ListeningHistoryRepository extends JpaRepository<ListeningHisto
         List<Object[]> findMostPlayedSongByArtist(
                         @org.springframework.data.repository.query.Param("artist") com.rev.app.entity.User artist,
                         Pageable pageable);
+
+        @Query("SELECT h.user.id, h.user.username, h.user.displayName, h.user.createdAt, COUNT(h) as playCount FROM ListeningHistory h WHERE h.song.artist = :artist GROUP BY h.user.id, h.user.username, h.user.displayName, h.user.createdAt ORDER BY playCount DESC")
+        List<Object[]> findTopListenersByArtist(@Param("artist") User artist, Pageable pageable);
 }

@@ -585,4 +585,43 @@ public class FrontendController {
         }
         return "redirect:/history";
     }
+
+    @Autowired
+    private com.rev.app.repository.FavoriteRepository favoriteRepository;
+
+    @GetMapping("/artist/dashboard")
+    public String artistDashboard(org.springframework.ui.Model model) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user == null || user.getRole() != com.rev.app.entity.Role.ARTIST) {
+            return "redirect:/dashboard";
+        }
+
+        long totalSongs = songRepository.countByArtistAndIsDeleted(user, 0);
+        long totalAlbums = albumRepository.countByArtistAndIsDeleted(user, 0);
+
+        Long totalPlaysObj = listeningHistoryRepository.countTotalPlaysByArtist(user);
+        long totalPlays = totalPlaysObj != null ? totalPlaysObj : 0L;
+
+        Long totalFavoritesObj = favoriteRepository.countTotalFavoritesByArtist(user);
+        long totalFavorites = totalFavoritesObj != null ? totalFavoritesObj : 0L;
+
+        java.util.List<com.rev.app.entity.Song> allSongs = songRepository
+                .findByArtistAndIsDeletedOrderByPlayCountDesc(user, 0);
+        java.util.List<com.rev.app.entity.Song> topSongs = allSongs.stream().limit(5).toList();
+
+        org.springframework.data.domain.Pageable top5 = org.springframework.data.domain.PageRequest.of(0, 5);
+        java.util.List<Object[]> topListeners = listeningHistoryRepository.findTopListenersByArtist(user, top5);
+
+        model.addAttribute("totalSongs", totalSongs);
+        model.addAttribute("totalAlbums", totalAlbums);
+        model.addAttribute("totalPlays", totalPlays);
+        model.addAttribute("totalFavorites", totalFavorites);
+        model.addAttribute("topSongs", topSongs);
+        model.addAttribute("topListeners", topListeners);
+
+        return "artist-dashboard";
+    }
 }

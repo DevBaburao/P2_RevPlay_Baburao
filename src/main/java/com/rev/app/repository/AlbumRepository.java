@@ -12,4 +12,6 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     List<Album> findByArtistUsername(String username);
 
     List<Album> findByIsDeleted(Integer isDeleted);
+
+    long countByArtistAndIsDeleted(com.rev.app.entity.User artist, Integer isDeleted);
 }

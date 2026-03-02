@@ -33,4 +33,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
         List<Song> findByArtist_IdAndIsDeleted(Long artistId, Integer isDeleted);
 
         List<Song> findTop5ByIsDeletedOrderByPlayCountDesc(Integer isDeleted);
+
+        List<Song> findByArtistAndIsDeletedOrderByPlayCountDesc(User artist, Integer isDeleted);
 }
