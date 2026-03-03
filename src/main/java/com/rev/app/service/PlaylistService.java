@@ -20,4 +20,14 @@ public interface PlaylistService {
     void deletePlaylist(Long id);
 
     List<PlaylistDTO> searchPlaylists(String name);
+
+    List<PlaylistDTO> getMyPlaylists(Long userId);
+
+    List<PlaylistDTO> getPublicPlaylists();
+
+    List<PlaylistDTO> getFollowedPlaylists(Long userId);
+
+    PlaylistDTO followPlaylist(Long playlistId, Long userId);
+
+    PlaylistDTO unfollowPlaylist(Long playlistId, Long userId);
 }

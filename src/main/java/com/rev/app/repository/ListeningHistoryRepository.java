@@ -23,6 +23,8 @@ public interface ListeningHistoryRepository extends JpaRepository<ListeningHisto
         @org.springframework.data.jpa.repository.Modifying
         void deleteByUser(User user);
 
+        long countByUser(User user);
+
         @Query("SELECT h.song, COUNT(h) FROM ListeningHistory h WHERE h.song.isDeleted = 0 GROUP BY h.song ORDER BY COUNT(h) DESC")
         List<Object[]> findTopPlayedSongs(Pageable pageable);
 

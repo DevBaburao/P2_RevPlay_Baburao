@@ -76,9 +76,15 @@ public class FrontendController {
     private com.rev.app.repository.ListeningHistoryRepository listeningHistoryRepository;
 
     @GetMapping("/songs/play/{id}")
-    public String playSong(@org.springframework.web.bind.annotation.PathVariable Long id) {
+    public String playSong(@org.springframework.web.bind.annotation.PathVariable Long id,
+            jakarta.servlet.http.HttpSession session) {
         com.rev.app.entity.Song song = songRepository.findById(id).orElse(null);
         if (song != null) {
+            com.rev.app.entity.PlaybackQueue queue = (com.rev.app.entity.PlaybackQueue) session.getAttribute("queue");
+            if (queue != null && queue.getSongIds().contains(id)) {
+                queue.setCurrentIndex(queue.getSongIds().indexOf(id));
+            }
+
             song.setPlayCount(song.getPlayCount() + 1);
             songRepository.save(song);
 
@@ -274,33 +280,7 @@ public class FrontendController {
         return "liked-songs";
     }
 
-    @GetMapping("/profile")
-    public String viewProfile(org.springframework.ui.Model model) {
-        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-        com.rev.app.entity.User user = userRepository.findByUsername(username).orElse(null);
-
-        if (user != null) {
-            model.addAttribute("user", user);
-            // Count total favorites
-            model.addAttribute("totalFavorites", user.getLikedSongs().size());
-
-            if (user.getRole() == com.rev.app.entity.Role.ARTIST) {
-                com.rev.app.entity.ArtistProfile artistProfile = artistProfileRepository.findByUserId(user.getId())
-                        .orElse(null);
-                model.addAttribute("artistProfile", artistProfile);
-                // Note: count totalPlaylists, totalPlays for Artist here if needed
-                return "artist-profile";
-            }
-
-            // Note: count totalPlaylists for formatting
-            long playlistCount = playlistRepository.findAll().stream().count();
-            model.addAttribute("totalPlaylists", playlistCount);
-
-            return "profile";
-        }
-        return "redirect:/login";
-    }
+    // Duplicate profile method removed
 
     @GetMapping("/artist/{username}")
     public String viewPublicArtistProfile(@org.springframework.web.bind.annotation.PathVariable String username,

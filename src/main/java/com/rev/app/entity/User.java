@@ -30,14 +30,14 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role = Role.USER;
 
     @Column(name = "display_name", length = 150)
     private String displayName;
 
-    @Lob
+    @jakarta.persistence.Lob
     private String bio;
 
     @Column(name = "profile_picture", length = 500)

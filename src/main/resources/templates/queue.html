@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>RevPlay - Playback Queue</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white d-flex align-items-center" th:href="@{/dashboard}">
+                <i class="bi bi-music-note-beamed me-2"></i> RevPlay
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/albums}">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/history}">History</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold text-info" th:href="@{/queue}">Queue</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0">Playback Queue</h2>
+                    <div class="d-flex gap-2">
+                        <form th:action="@{/queue/shuffle/toggle}" method="post">
+                            <button type="submit" class="btn btn-sm"
+                                th:classappend="${queue.shuffleEnabled ? 'btn-primary' : 'btn-outline-secondary'}"
+                                title="Shuffle">
+                                <i class="bi bi-shuffle"></i>
+                            </button>
+                        </form>
+
+                        <form th:action="@{/queue/repeat/set}" method="post" class="d-flex gap-1">
+                            <input type="hidden" name="mode"
+                                th:value="${queue.repeatMode.name() == 'OFF' ? 'ALL' : (queue.repeatMode.name() == 'ALL' ? 'ONE' : 'OFF')}">
+                            <button type="submit" class="btn btn-sm"
+                                th:classappend="${queue.repeatMode.name() == 'OFF' ? 'btn-outline-secondary' : 'btn-primary'}"
+                                title="Repeat">
+                                <i class="bi"
+                                    th:classappend="${queue.repeatMode.name() == 'ONE' ? 'bi-repeat-1' : 'bi-repeat'}"></i>
+                            </button>
+                        </form>
+
+                        <form th:action="@{/queue/clear}" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Clear Queue">
+                                <i class="bi bi-trash"></i> Clear
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Now Playing -->
+                <div class="card shadow-sm border-0 mb-4 bg-dark text-white rounded-4 overflow-hidden"
+                    th:if="${currentSong != null}">
+                    <div class="card-body p-4">
+                        <h6 class="text-uppercase text-white-50 fw-bold mb-3" style="letter-spacing: 1px;">Now Playing
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-25 rounded d-flex align-items-center justify-content-center me-3"
+                                style="width: 60px; height: 60px;">
+                                <i class="bi bi-music-note-beamed fs-2 text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="mb-1 fw-bold" th:text="${currentSong.title}">Title</h4>
+                                <p class="mb-0 text-white-50"
+                                    th:text="${currentSong.artist.displayName != null ? currentSong.artist.displayName : currentSong.artist.username}">
+                                    Artist</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex align-items-center gap-3">
+                            <a th:href="@{/queue/prev}" class="btn btn-outline-light rounded-circle"><i
+                                    class="bi bi-skip-backward-fill"></i></a>
+
+                            <audio id="main-player" controls autoplay class="flex-grow-1" style="height: 40px;"
+                                onended="window.location.href='/queue/auto-next'">
+                                <source th:src="@{/songs/play/{id}(id=${currentSong.id})}" type="audio/mpeg">
+                            </audio>
+
+                            <a th:href="@{/queue/next}" class="btn btn-outline-light rounded-circle"><i
+                                    class="bi bi-skip-forward-fill"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary text-center rounded-4 border-0"
+                    th:if="${queuedSongs == null || queuedSongs.isEmpty()}">
+                    <i class="bi bi-music-note-list fs-1 text-muted mb-2 d-block"></i>
+                    <h5 class="fw-bold">Your queue is empty</h5>
+                    <p class="mb-0">Add songs to your queue to start listening.</p>
+                </div>
+
+                <!-- Queue List -->
+                <div class="card shadow-sm border-0 rounded-4" th:if="${queuedSongs != null && !queuedSongs.isEmpty()}">
+                    <div class="list-group list-group-flush rounded-4">
+                        <div th:each="song, stat : ${queuedSongs}"
+                            class="list-group-item p-3 d-flex align-items-center justify-content-between"
+                            th:classappend="${stat.index == queue.currentIndex ? 'bg-primary bg-opacity-10 border-start border-4 border-primary' : ''}">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted fw-bold" style="width: 25px;" th:text="${stat.count}">1</span>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" th:text="${song.title}">Song Title</h6>
+                                    <small class="text-muted"
+                                        th:text="${song.artist.displayName != null ? song.artist.displayName : song.artist.username}">Artist</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-center">
+                                <a th:href="@{/songs/play/{id}(id=${song.id})}"
+                                    class="btn btn-sm btn-outline-primary rounded-circle"
+                                    th:if="${stat.index != queue.currentIndex}">
+                                    <i class="bi bi-play-fill"></i>
+                                </a>
+                                <span class="badge bg-primary rounded-pill px-3 py-2"
+                                    th:if="${stat.index == queue.currentIndex}">Playing</span>
+
+                                <form th:action="@{/queue/remove/{id}(id=${song.id})}" method="post">
+                                    <button class="btn btn-sm btn-light text-danger rounded-circle" type="submit"
+                                        title="Remove">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

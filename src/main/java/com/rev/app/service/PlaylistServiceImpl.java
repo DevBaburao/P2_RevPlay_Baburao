@@ -18,10 +18,13 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     private final PlaylistRepository playlistRepository;
     private final SongRepository songRepository;
+    private final com.rev.app.repository.UserRepository userRepository;
 
-    public PlaylistServiceImpl(PlaylistRepository playlistRepository, SongRepository songRepository) {
+    public PlaylistServiceImpl(PlaylistRepository playlistRepository, SongRepository songRepository,
+            com.rev.app.repository.UserRepository userRepository) {
         this.playlistRepository = playlistRepository;
         this.songRepository = songRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -29,6 +32,13 @@ public class PlaylistServiceImpl implements PlaylistService {
         Playlist playlist = new Playlist();
         playlist.setName(dto.getName());
         playlist.setDescription(dto.getDescription());
+        playlist.setPrivacy(
+                dto.getPrivacy() != null && dto.getPrivacy().equalsIgnoreCase("PRIVATE") ? Playlist.Privacy.PRIVATE
+                        : Playlist.Privacy.PUBLIC);
+
+        if (dto.getUserId() != null) {
+            playlist.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+        }
 
         Playlist savedPlaylist = playlistRepository.save(playlist);
         return mapToDTO(savedPlaylist);
@@ -107,6 +117,68 @@ public class PlaylistServiceImpl implements PlaylistService {
                             .collect(Collectors.toList()));
         }
 
+        if (playlist.getUser() != null) {
+            dto.setUserId(playlist.getUser().getId());
+        }
+        if (playlist.getPrivacy() != null) {
+            dto.setPrivacy(playlist.getPrivacy().name());
+        }
+        if (playlist.getFollowers() != null) {
+            dto.setFollowerCount(playlist.getFollowers().size());
+        }
+
         return dto;
+    }
+
+    @Override
+    public List<PlaylistDTO> getMyPlaylists(Long userId) {
+        com.rev.app.entity.User user = userRepository.findById(userId).orElse(null);
+        if (user == null)
+            return List.of();
+        return playlistRepository.findByUserAndIsDeleted(user, 0).stream().map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlaylistDTO> getPublicPlaylists() {
+        return playlistRepository.findByPrivacyAndIsDeleted(Playlist.Privacy.PUBLIC, 0).stream().map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlaylistDTO> getFollowedPlaylists(Long userId) {
+        com.rev.app.entity.User user = userRepository.findById(userId).orElse(null);
+        if (user == null)
+            return List.of();
+        return playlistRepository.findByFollowersContainingAndIsDeleted(user, 0).stream().map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PlaylistDTO followPlaylist(Long playlistId, Long userId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found"));
+        com.rev.app.entity.User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (playlist.getPrivacy() == Playlist.Privacy.PUBLIC && !playlist.getFollowers().contains(user)) {
+            playlist.getFollowers().add(user);
+            playlistRepository.save(playlist);
+        }
+        return mapToDTO(playlist);
+    }
+
+    @Override
+    public PlaylistDTO unfollowPlaylist(Long playlistId, Long userId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found"));
+        com.rev.app.entity.User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (playlist.getFollowers().contains(user)) {
+            playlist.getFollowers().remove(user);
+            playlistRepository.save(playlist);
+        }
+        return mapToDTO(playlist);
     }
 }

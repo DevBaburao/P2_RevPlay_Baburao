@@ -45,6 +45,46 @@ public class Playlist {
     @JoinTable(name = "playlist_songs", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "song_id"))
     private Set<Song> songs = new HashSet<>();
 
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(length = 20)
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    private Privacy privacy = Privacy.PUBLIC;
+
+    @ManyToMany
+    @JoinTable(name = "playlist_followers", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> followers = new HashSet<>();
+
+    public enum Privacy {
+        PUBLIC, PRIVATE
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Privacy getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(Privacy privacy) {
+        this.privacy = privacy;
+    }
+
+    public Set<User> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<User> followers) {
+        this.followers = followers;
+    }
+
     public Long getId() {
         return id;
     }

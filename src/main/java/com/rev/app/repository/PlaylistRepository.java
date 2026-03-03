@@ -13,4 +13,10 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     Page<Playlist> findByIsDeleted(Integer isDeleted, Pageable pageable);
 
     List<Playlist> findByNameContainingIgnoreCaseAndIsDeleted(String name, Integer isDeleted);
+
+    List<Playlist> findByUserAndIsDeleted(com.rev.app.entity.User user, Integer isDeleted);
+
+    List<Playlist> findByPrivacyAndIsDeleted(Playlist.Privacy privacy, Integer isDeleted);
+
+    List<Playlist> findByFollowersContainingAndIsDeleted(com.rev.app.entity.User user, Integer isDeleted);
 }

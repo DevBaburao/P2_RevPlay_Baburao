@@ -161,6 +161,11 @@
                             <audio controls class="form-control-sm border-0 w-100 me-2" style="height: 30px;">
                                 <source th:src="@{/songs/play/{id}(id=${song.id})}" type="audio/mpeg">
                             </audio>
+                            <form th:action="@{/queue/add/{id}(id=${song.id})}" method="post" class="m-0 ms-2">
+                                <button type="submit" class="btn btn-sm btn-outline-info rounded-circle"
+                                    title="Add to Queue">
+                                    <i class="bi bi-plus"></i></button>
+                            </form>
                         </div>
                     </div>
                 </div>

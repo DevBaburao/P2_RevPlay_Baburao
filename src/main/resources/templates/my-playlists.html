@@ -25,7 +25,8 @@
                     <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
                     <a class="nav-link active" th:href="@{/my-playlists}">My Playlists</a>
                     <a class="nav-link" th:href="@{/liked-songs}">Liked Songs</a>
-                    <a class="nav-link" th:href="@{/history}">History</a>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/history}">History</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold text-info" th:href="@{/queue}">Queue</a></li>
                     <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
                     <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/artist/dashboard}">Analytics</a>
                     <a class="nav-link" sec:authorize="hasRole('ARTIST')" th:href="@{/my-albums}">My Albums</a>
@@ -75,6 +76,13 @@
                                 <label for="description" class="form-label fw-semibold">Description (Optional)</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"
                                     placeholder="What's this playlist about?"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="privacy" class="form-label fw-semibold">Privacy</label>
+                                <select class="form-select" id="privacy" name="privacy">
+                                    <option value="PUBLIC" selected>Public</option>
+                                    <option value="PRIVATE">Private</option>
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer border-top-0 pt-0">
@@ -143,6 +151,56 @@
                     <h4 class="text-muted mb-3">You don't have any playlists yet.</h4>
                     <a class="btn btn-primary px-4 rounded-pill shadow-sm" th:href="@{/dashboard}">Discover New
                         Music</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5" th:if="${followedPlaylists != null and !followedPlaylists.isEmpty()}">
+            <div class="col-12 text-center text-md-start mb-3">
+                <h3 class="fw-bold mb-1">Followed Playlists</h3>
+            </div>
+            <div class="col-12">
+                <div th:each="playlist : ${followedPlaylists}"
+                    class="card mb-4 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div
+                        class="card-header bg-white border-bottom pb-2 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold text-primary" th:text="${playlist.name}">Playlist Title</h4>
+                            <p class="text-muted small mb-0" th:text="${playlist.description}">Playlist Description</p>
+                            <p class="text-secondary small mb-0">By: <span
+                                    th:text="${playlist.user != null ? playlist.user.username : 'Unknown'}">User</span>
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <form th:action="@{/playlists/{playlistId}/unfollow(playlistId=${playlist.id})}"
+                                method="post" class="m-0">
+                                <button type="submit"
+                                    class="btn btn-sm btn-outline-danger rounded-pill px-3">Unfollow</button>
+                            </form>
+                            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                                <span th:text="${playlist.songs != null ? playlist.songs.size() : 0}"></span> Tracks
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush"
+                            th:if="${playlist.songs != null and !playlist.songs.isEmpty()}">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4"
+                                th:each="song : ${playlist.songs}">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold" th:text="${song.title}">Song Title</span>
+                                    <span class="text-secondary small"
+                                        th:text="${song.artist != null ? (song.artist.displayName != null ? song.artist.displayName : song.artist.username) : 'Unknown Artist'}">Artist</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a th:href="@{/songs/play/{id}(id=${song.id})}"
+                                        class="btn btn-sm btn-outline-primary rounded-circle"><i
+                                            class="bi bi-play-fill"></i></a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
